@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "CRTQL": {
+      "commandName": "Project",
+      "commandLineArgs": " TestInputs\\* /o:TestOutputs",
+      "workingDirectory": "C:\\Users\\panca\\Projects\\CRTQL"
+    }
+  }
+}

@@ -184,18 +184,18 @@ namespace CRTQL {
         ///
         ///SqlFormatter &lt;filename or pattern&gt; &lt;options&gt;
         ///
-        ///is  indentString (default: \t)
+        ///is  indentString (default: &quot;    &quot; (4 spaces))
         ///st  spacesPerTab (default: 4)
         ///mw  maxLineWidth (default: 999)
         ///sb  statementBreaks (default: 2)
         ///cb  clauseBreaks (default: 1)
-        ///tc  trailingCommas (default: false)
+        ///tc  trailingCommas (default: true)
         ///sac spaceAfterExpandedComma (default: false)
         ///ebc expandBetweenConditions (default: true)
         ///ebe expandBooleanExpressions (default: true)
         ///ecs expandCaseStatements (default: true)
         ///ecl expandCommaLists (default: true)
-        ///eil expandInLists (default: true [rest of string was truncated]&quot;;.
+        ///eil expandInLists  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string ProgramUsageNotes {
             get {

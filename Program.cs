@@ -153,17 +153,20 @@ namespace CRTQL {
 
             // if we have file input
             else {
-                System.IO.DirectoryInfo baseDirectory = null;
+                DirectoryInfo baseDirectory = null;
                 string searchPattern = Path.GetFileName(remainingArgs[0]);
                 string baseDirectoryName = Path.GetDirectoryName(remainingArgs[0]);
+
                 if (baseDirectoryName.Length == 0) {
                     baseDirectoryName = ".";
                     if (searchPattern.Equals("."))
                         searchPattern = "";
                 }
-                System.IO.FileSystemInfo[] matchingObjects = null;
+
+                /* collect the matching files to be formatted */
+                FileSystemInfo[] matchingObjects = null;
                 try {
-                    baseDirectory = new System.IO.DirectoryInfo(baseDirectoryName);
+                    baseDirectory = new DirectoryInfo(baseDirectoryName);
                     if (searchPattern.Length > 0) {
                         if (recursiveSearch)
                             matchingObjects = baseDirectory.GetFileSystemInfos(searchPattern);
@@ -182,7 +185,8 @@ namespace CRTQL {
                     return 2;
                 }
 
-                System.IO.StreamWriter singleFileWriter = null;
+                /* setup the output - either replace in-file or poop into some folder */
+                StreamWriter singleFileWriter = null;
                 string replaceFromFolderPath = null;
                 string replaceToFolderPath = null;
                 if (!string.IsNullOrEmpty(outputFileOrFolder)) {
@@ -234,16 +238,16 @@ namespace CRTQL {
                 return 0; //we got there, did something, and received no (handled) errors!
         }
 
-        private static bool ProcessSearchResults(
-                List<string> extensions, 
-                bool backups, 
-                bool allowParsingErrors, 
-                PoorMansTSqlFormatterLib.SqlFormattingManager formattingManager, 
-                FileSystemInfo[] matchingObjects, 
-                StreamWriter singleFileWriter, 
-                string replaceFromFolderPath, 
-                string replaceToFolderPath, 
-                ref bool warningEncountered) {
+
+
+        /// <summary>
+        /// Given a list of files, call the ReFormatFile method on each sql file
+        /// </summary>
+        private static bool ProcessSearchResults(List<string> extensions, bool backups, bool allowParsingErrors,
+            PoorMansTSqlFormatterLib.SqlFormattingManager formattingManager, FileSystemInfo[] matchingObjects,
+            StreamWriter singleFileWriter, string replaceFromFolderPath, string replaceToFolderPath,
+            ref bool warningEncountered) {
+
             bool fileFound = false;
 
             foreach (var fsEntry in matchingObjects) {
@@ -267,7 +271,7 @@ namespace CRTQL {
                             backups, 
                             allowParsingErrors, 
                             formattingManager, 
-                            ((System.IO.DirectoryInfo)fsEntry).GetFileSystemInfos(), 
+                            ((DirectoryInfo)fsEntry).GetFileSystemInfos(), 
                             singleFileWriter, 
                             replaceFromFolderPath, 
                             replaceToFolderPath, 
@@ -279,15 +283,14 @@ namespace CRTQL {
             return fileFound;
         }
 
+        /// <summary>
+        /// Actually do the logic of formatting one file
+        /// </summary>
         private static void ReFormatFile(
-                FileInfo fileInfo, 
-                PoorMansTSqlFormatterLib.SqlFormattingManager formattingManager, 
-                bool backups, 
-                bool allowParsingErrors, 
-                StreamWriter singleFileWriter, 
-                string replaceFromFolderPath, 
-                string replaceToFolderPath, 
-                ref bool warningEncountered) {
+            FileInfo fileInfo, PoorMansTSqlFormatterLib.SqlFormattingManager formattingManager, bool backups,
+            bool allowParsingErrors, StreamWriter singleFileWriter, string replaceFromFolderPath,
+            string replaceToFolderPath, ref bool warningEncountered) {
+
             bool failedBackup = false;
             string oldFileContents = "";
             string newFileContents = "";
@@ -299,7 +302,7 @@ namespace CRTQL {
             //TODO: consider using auto-detection - read binary, autodetect, convert.
             //TODO: consider whether to keep same output encoding as source file, or always use same, and if so whether to make parameter-based.
             try {
-                oldFileContents = System.IO.File.ReadAllText(fileInfo.FullName);
+                oldFileContents = File.ReadAllText(fileInfo.FullName);
             }
             catch (Exception ex) {
                 Console.Error.WriteLine(string.Format(rm.GetString("FileReadFailureWarningMessage"), fileInfo.FullName));
@@ -374,12 +377,14 @@ namespace CRTQL {
             }
         }
 
+
+        /// <summary>
+        /// Write text to the specified file
+        /// </summary>
         private static void WriteResultFile(
-                string targetFilePath, 
-                string replaceFromFolderPath, 
-                string replaceToFolderPath, 
-                ref bool warningEncountered, 
-                string newFileContents) {
+            string targetFilePath, string replaceFromFolderPath, string replaceToFolderPath, ref bool warningEncountered,
+            string newFileContents) {
+
             try {
                 File.WriteAllText(targetFilePath, newFileContents);
             }

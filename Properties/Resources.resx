@@ -165,12 +165,12 @@ Copyright (C) 2011-2017 Tao Klerks</value>
 
 SqlFormatter &lt;filename or pattern&gt; &lt;options&gt;
 
-is  indentString (default: \t)
+is  indentString (default: "    " (4 spaces))
 st  spacesPerTab (default: 4)
 mw  maxLineWidth (default: 999)
 sb  statementBreaks (default: 2)
 cb  clauseBreaks (default: 1)
-tc  trailingCommas (default: false)
+tc  trailingCommas (default: true)
 sac spaceAfterExpandedComma (default: false)
 ebc expandBetweenConditions (default: true)
 ebe expandBooleanExpressions (default: true)
@@ -183,7 +183,7 @@ ae  allowParsingErrors (default: false)
 e   extensions (default: sql)
 r   recursive (default: false)
 b   backups (default: true)
-b   outputFileOrFolder (default: none; if set, overrides the backup option)
+o   outputFileOrFolder (default: none; if set, overrides the backup option)
 l   languageCode (default: current if supported or EN; valid values include EN, FR and ES)
 h ? help
 
