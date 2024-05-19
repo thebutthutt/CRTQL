@@ -91,6 +91,9 @@ namespace PoorMansTSqlFormatterLib.Tokenizers {
       return TokenizeSQL(inputSQL, null);
     }
 
+    /// <summary>
+    /// Start here
+    /// </summary>
     public ITokenList TokenizeSQL(string inputSQL, long? requestedMarkerPosition) {
       var state = new TokenizationState(inputSQL, requestedMarkerPosition);
 

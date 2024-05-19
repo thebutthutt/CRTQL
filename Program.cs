@@ -30,7 +30,8 @@ namespace CRTQL {
                 ExpandCommaLists = true,
                 BreakJoinOnSections = false,
                 UppercaseKeywords = true,
-                ExpandInLists = true
+                ExpandInLists = true,
+                WrapNamesInBraces = true
             };
 
             //bulk formatter options
@@ -58,6 +59,7 @@ namespace CRTQL {
                 .Add("ecs|expandCaseStatements", delegate (string v) { options.ExpandCaseStatements = v != null; })
                 .Add("ecl|expandCommaLists", delegate (string v) { options.ExpandCommaLists = v != null; })
                 .Add("eil|expandInLists", delegate (string v) { options.ExpandInLists = v != null; })
+                .Add("wnb|wrapNamesInBraces", delegate (string v) { options.WrapNamesInBraces = v != null; })
                 .Add("bjo|breakJoinOnSections", delegate (string v) { options.BreakJoinOnSections = v != null; })
                 .Add("uk|uppercaseKeywords", delegate (string v) { options.UppercaseKeywords = v != null; })
                 .Add("sk|standardizeKeywords", delegate (string v) { options.KeywordStandardization = v != null; })
