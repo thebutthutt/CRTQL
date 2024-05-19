@@ -6,7 +6,7 @@ CREATE PROCEDURE [GetTitleForHREmployeesWithMaxVacation] (
     )
 AS
 BEGIN TRY
-    BEGIN TRANSACTION
+    BEGIN TRAN
 
     SELECT [JobTitle]
     FROM [AdventureWorks2017].[HumanResources].[Employee]
@@ -20,13 +20,13 @@ BEGIN TRY
     WHERE [Gender] = @Gender
         AND DATEDIFF(YEAR, [HireDate], GETDATE()) <= @NumberOfYearsHired;
 
-    COMMIT TRANSACTION
+    COMMIT TRAN
 END TRY
 
 BEGIN CATCH
     IF (@@TRANCOUNT > 0)
     BEGIN
-        ROLLBACK TRANSACTION
+        ROLLBACK TRAN
 
         PRINT 'Error detected, all changes reversed'
     END

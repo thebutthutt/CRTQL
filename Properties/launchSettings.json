@@ -2,7 +2,7 @@
   "profiles": {
     "CRTQL": {
       "commandName": "Project",
-      "commandLineArgs": " TestInputs\\* /o:TestOutputs",
+      "commandLineArgs": " TestInputs\\sampleSPtwo.sql /o:TestOutputs",
       "workingDirectory": "C:\\Users\\panca\\Projects\\CRTQL"
     }
   }

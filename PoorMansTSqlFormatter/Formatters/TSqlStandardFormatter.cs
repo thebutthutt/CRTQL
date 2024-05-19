@@ -143,7 +143,6 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                 case SqlStructureConstants.ENAME_CONTAINER_CLOSE:
                 case SqlStructureConstants.ENAME_WHILE_LOOP:
                 case SqlStructureConstants.ENAME_IF_STATEMENT:
-                case SqlStructureConstants.ENAME_SELECTIONTARGET:
                 case SqlStructureConstants.ENAME_CONTAINER_GENERALCONTENT:
                 case SqlStructureConstants.ENAME_CTE_WITH_CLAUSE:
                 case SqlStructureConstants.ENAME_PERMISSIONS_BLOCK:
@@ -151,6 +150,13 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                 case SqlStructureConstants.ENAME_MERGE_CLAUSE:
                 case SqlStructureConstants.ENAME_MERGE_TARGET:
                     ProcessSqlNodeList(contentElement.Children, state);
+                    break;
+
+                case SqlStructureConstants.ENAME_SELECTIONTARGET:
+                    state.BreakExpected = true;
+                    //state.IncrementIndent();
+                    ProcessSqlNodeList(contentElement.Children, state);
+                    //state.DecrementIndent();
                     break;
 
                 case SqlStructureConstants.ENAME_CASE_INPUT:
@@ -534,9 +540,14 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                     state.WordSeparatorExpected = true;
                     break;
 
+                // this is like INNER JOIN etc
                 case SqlStructureConstants.ENAME_COMPOUNDKEYWORD:
                     WhiteSpace_SeparateWords(state);
                     state.SetRecentKeyword(contentElement.GetAttributeValue(SqlStructureConstants.ANAME_SIMPLETEXT));
+                    // words I want to indent a little
+                    if (contentElement.GetAttributeValue(SqlStructureConstants.ANAME_SIMPLETEXT).Contains("JOIN"))
+                        state.Indent(state.IndentLevel - 1);
+
                     state.AddOutputContent(FormatKeyword(contentElement.GetAttributeValue(SqlStructureConstants.ANAME_SIMPLETEXT)), SqlHtmlConstants.CLASS_KEYWORD);
                     state.WordSeparatorExpected = true;
                     ProcessSqlNodeList(contentElement.ChildrenByNames(SqlStructureConstants.ENAMELIST_COMMENT), state.IncrementIndent());
@@ -549,7 +560,7 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                     WhiteSpace_SeparateWords(state);
                     state.SetRecentKeyword(contentElement.TextValue);
                     state.AddOutputContent(FormatKeyword(contentElement.TextValue), SqlHtmlConstants.CLASS_KEYWORD);
-                    state.WordSeparatorExpected = true;
+                    AddLineBreakIfAfterSpecifiedKeyword(contentElement, state);
                     break;
 
                 case SqlStructureConstants.ENAME_PSEUDONAME:
@@ -680,6 +691,16 @@ namespace PoorMansTSqlFormatterLib.Formatters {
             }
 
             return target;
+        }
+
+        private void AddLineBreakIfAfterSpecifiedKeyword(Node contentElement, TSqlStandardFormattingState state) {
+            if (string.Compare(contentElement.TextValue, "select", StringComparison.OrdinalIgnoreCase) == 0
+             || string.Compare(contentElement.TextValue, "where", StringComparison.OrdinalIgnoreCase) == 0) {
+                state.BreakExpected = true;
+            }
+            else {
+                state.WordSeparatorExpected = true;
+            }
         }
 
         private void WhiteSpace_SeparateWords(TSqlStandardFormattingState state) {

@@ -16,7 +16,7 @@ namespace CRTQL {
 
             //formatter engine option defaults
             var options = new PoorMansTSqlFormatterLib.Formatters.TSqlStandardFormatterOptions {
-                KeywordStandardization = true,
+                KeywordStandardization = false,
                 IndentString = "    ",
                 SpacesPerTab = 4,
                 MaxLineWidth = 999,
@@ -28,7 +28,7 @@ namespace CRTQL {
                 ExpandBooleanExpressions = true,
                 ExpandCaseStatements = true,
                 ExpandCommaLists = true,
-                BreakJoinOnSections = false,
+                BreakJoinOnSections = true,
                 UppercaseKeywords = true,
                 ExpandInLists = true,
                 WrapNamesInBraces = true
