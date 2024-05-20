@@ -423,6 +423,7 @@ namespace PoorMansTSqlFormatterLib.Parsers {
                             && !sqlTree.PathNameMatches(0, SqlStructureConstants.ENAME_EXPRESSION_PARENS)
                             && !ContentStartsWithKeyword(sqlTree.CurrentContainer, "SET")
                             ) {
+                                sqlTree.EscapeJoinCondition();
                                 sqlTree.StartNewContainer(SqlStructureConstants.ENAME_JOIN_ON_SECTION, token.Value, SqlStructureConstants.ENAME_CONTAINER_GENERALCONTENT);
                             }
                             else {
