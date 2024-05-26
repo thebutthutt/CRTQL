@@ -1,4 +1,9 @@
-CREATE PROCEDURE [GetTitleForHREmployeesWithMaxVacation] (
+DECLARE @ErrMsg = VARCHAR(500)
+
+CREATE
+    OR
+
+ALTER PROCEDURE [GetTitleForHREmployeesWithMaxVacation] (
     @Gender NCHAR(1),
     @NumberOfYearsHired INT
     )
@@ -39,11 +44,23 @@ BEGIN CATCH
     BEGIN
         ROLLBACK TRAN
 
-        PRINT 'Error detected, all changes reversed'
+        SET @ErrMsg = CONCAT (
+                (
+                    SELECT
+                        ERROR_PROCEDURE()
+                    ),
+                '>',
+                (
+                    SELECT
+                        ERROR_LINE()
+                    ),
+                ':',
+                (
+                    SELECT
+                        ERROR_MESSAGE()
+                    )
+                )
 
-        SELECT
-            ERROR_PROCEDURE() AS [ErrorProcedure],
-            ERROR_LINE() AS [ErrorLine],
-            ERROR_MESSAGE() AS [ErrorMessage]
+        RAISERROR (@ErrMsg)
     END
 END CATCH

@@ -39,7 +39,6 @@ namespace PoorMansTSqlFormatterLib.Formatters {
             ExpandCaseStatements = true;
             UppercaseKeywords = true;
             BreakJoinOnSections = false;
-            HTMLColoring = false;
             KeywordStandardization = false;
             ExpandInLists = true;
             NewClauseLineBreaks = 1;
@@ -74,7 +73,6 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                 else if (key == "ExpandCaseStatements") ExpandCaseStatements = Convert.ToBoolean(value);
                 else if (key == "UppercaseKeywords") UppercaseKeywords = Convert.ToBoolean(value);
                 else if (key == "BreakJoinOnSections") BreakJoinOnSections = Convert.ToBoolean(value);
-                else if (key == "HTMLColoring") HTMLColoring = Convert.ToBoolean(value);
                 else if (key == "KeywordStandardization") KeywordStandardization = Convert.ToBoolean(value);
                 else if (key == "ExpandInLists") ExpandInLists = Convert.ToBoolean(value);
                 else if (key == "WrapNamesInBraces") WrapNamesInBraces = Convert.ToBoolean(value);
@@ -102,7 +100,6 @@ namespace PoorMansTSqlFormatterLib.Formatters {
             if (ExpandCaseStatements != _defaultOptions.ExpandCaseStatements) overrides.Add("ExpandCaseStatements", ExpandCaseStatements.ToString());
             if (UppercaseKeywords != _defaultOptions.UppercaseKeywords) overrides.Add("UppercaseKeywords", UppercaseKeywords.ToString());
             if (BreakJoinOnSections != _defaultOptions.BreakJoinOnSections) overrides.Add("BreakJoinOnSections", BreakJoinOnSections.ToString());
-            if (HTMLColoring != _defaultOptions.HTMLColoring) overrides.Add("HTMLColoring", HTMLColoring.ToString());
             if (KeywordStandardization != _defaultOptions.KeywordStandardization) overrides.Add("KeywordStandardization", KeywordStandardization.ToString());
             if (ExpandInLists != _defaultOptions.ExpandInLists) overrides.Add("ExpandInLists", ExpandInLists.ToString());
             if (WrapNamesInBraces != _defaultOptions.WrapNamesInBraces) overrides.Add("WrapNamesInBraces", WrapNamesInBraces.ToString());
@@ -135,7 +132,6 @@ namespace PoorMansTSqlFormatterLib.Formatters {
         public bool ExpandBetweenConditions { get; set; }
         public bool UppercaseKeywords { get; set; }
         public bool BreakJoinOnSections { get; set; }
-        public bool HTMLColoring { get; set; }
         public bool KeywordStandardization { get; set; }
         public bool ExpandInLists { get; set; }
         public int NewClauseLineBreaks { get; set; }

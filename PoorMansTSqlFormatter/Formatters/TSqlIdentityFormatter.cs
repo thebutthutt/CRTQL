@@ -26,22 +26,17 @@ using PoorMansTSqlFormatterLib.Interfaces;
 
 namespace PoorMansTSqlFormatterLib.Formatters {
   /// <summary>
-  /// This formatter is intended to output *exactly the same content as initially parsed*, unless the 
-  /// "HtmlColoring" option is enabled (then it should look the same in HTML, except for the coloring).
+  /// This formatter is intended to output *exactly the same content as initially parsed*
   /// </summary>
   public class TSqlIdentityFormatter : ISqlTokenFormatter, ISqlTreeFormatter {
-    public TSqlIdentityFormatter() : this(false) { }
-    public TSqlIdentityFormatter(bool htmlColoring) {
-      HTMLColoring = htmlColoring;
+    public TSqlIdentityFormatter() {
       ErrorOutputPrefix = MessagingConstants.FormatErrorDefaultMessage + Environment.NewLine;
     }
 
-    public bool HTMLColoring { get; set; }
-    public bool HTMLFormatted { get { return HTMLColoring; } }
     public string ErrorOutputPrefix { get; set; }
 
     public string FormatSQLTree(Node sqlTreeDoc) {
-      BaseFormatterState state = new BaseFormatterState(HTMLColoring);
+      BaseFormatterState state = new BaseFormatterState();
 
       if (sqlTreeDoc.Name == SqlStructureConstants.ENAME_SQL_ROOT && sqlTreeDoc.GetAttributeValue(SqlStructureConstants.ANAME_ERRORFOUND) == "1")
         state.AddOutputContent(ErrorOutputPrefix);
@@ -57,8 +52,6 @@ namespace PoorMansTSqlFormatterLib.Formatters {
     }
 
     private static void ProcessSqlNode(BaseFormatterState state, Node contentElement) {
-      if (contentElement.GetAttributeValue(SqlStructureConstants.ANAME_HASERROR) == "1")
-        state.OpenClass(SqlHtmlConstants.CLASS_ERRORHIGHLIGHT);
 
       switch (contentElement.Name) {
         case SqlStructureConstants.ENAME_DDLDETAIL_PARENS:
@@ -133,19 +126,19 @@ namespace PoorMansTSqlFormatterLib.Formatters {
           break;
 
         case SqlStructureConstants.ENAME_COMMENT_MULTILINE:
-          state.AddOutputContent("/*" + contentElement.TextValue + "*/", SqlHtmlConstants.CLASS_COMMENT);
+          state.AddOutputContent("/*" + contentElement.TextValue + "*/");
           break;
         case SqlStructureConstants.ENAME_COMMENT_SINGLELINE:
-          state.AddOutputContent("--" + contentElement.TextValue, SqlHtmlConstants.CLASS_COMMENT);
+          state.AddOutputContent("--" + contentElement.TextValue);
           break;
         case SqlStructureConstants.ENAME_COMMENT_SINGLELINE_CSTYLE:
-          state.AddOutputContent("//" + contentElement.TextValue, SqlHtmlConstants.CLASS_COMMENT);
+          state.AddOutputContent("//" + contentElement.TextValue);
           break;
         case SqlStructureConstants.ENAME_STRING:
-          state.AddOutputContent("'" + contentElement.TextValue.Replace("'", "''") + "'", SqlHtmlConstants.CLASS_STRING);
+          state.AddOutputContent("'" + contentElement.TextValue.Replace("'", "''") + "'");
           break;
         case SqlStructureConstants.ENAME_NSTRING:
-          state.AddOutputContent("N'" + contentElement.TextValue.Replace("'", "''") + "'", SqlHtmlConstants.CLASS_STRING);
+          state.AddOutputContent("N'" + contentElement.TextValue.Replace("'", "''") + "'");
           break;
         case SqlStructureConstants.ENAME_QUOTED_STRING:
           state.AddOutputContent("\"" + contentElement.TextValue.Replace("\"", "\"\"") + "\"");
@@ -162,22 +155,22 @@ namespace PoorMansTSqlFormatterLib.Formatters {
         case SqlStructureConstants.ENAME_SCOPERESOLUTIONOPERATOR:
         case SqlStructureConstants.ENAME_ALPHAOPERATOR:
         case SqlStructureConstants.ENAME_OTHEROPERATOR:
-          state.AddOutputContent(contentElement.TextValue, SqlHtmlConstants.CLASS_OPERATOR);
+          state.AddOutputContent(contentElement.TextValue);
           break;
 
         case SqlStructureConstants.ENAME_AND_OPERATOR:
         case SqlStructureConstants.ENAME_OR_OPERATOR:
-          state.AddOutputContent(contentElement.ChildByName(SqlStructureConstants.ENAME_OTHERKEYWORD).TextValue, SqlHtmlConstants.CLASS_OPERATOR);
+          state.AddOutputContent(contentElement.ChildByName(SqlStructureConstants.ENAME_OTHERKEYWORD).TextValue);
           break;
 
         case SqlStructureConstants.ENAME_FUNCTION_KEYWORD:
-          state.AddOutputContent(contentElement.TextValue, SqlHtmlConstants.CLASS_FUNCTION);
+          state.AddOutputContent(contentElement.TextValue);
           break;
 
         case SqlStructureConstants.ENAME_OTHERKEYWORD:
         case SqlStructureConstants.ENAME_DATATYPE_KEYWORD:
         case SqlStructureConstants.ENAME_PSEUDONAME:
-          state.AddOutputContent(contentElement.TextValue, SqlHtmlConstants.CLASS_KEYWORD);
+          state.AddOutputContent(contentElement.TextValue);
           break;
 
         case SqlStructureConstants.ENAME_OTHERNODE:
@@ -192,8 +185,6 @@ namespace PoorMansTSqlFormatterLib.Formatters {
           throw new Exception("Unrecognized element in SQL Xml!");
       }
 
-      if (contentElement.GetAttributeValue(SqlStructureConstants.ANAME_HASERROR) == "1")
-        state.CloseClass();
     }
 
 
