@@ -21,8 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using System;
 
 namespace PoorMansTSqlFormatterLib.Interfaces {
-  public interface IToken {
-    SqlTokenType Type { get; set; }
-    string Value { get; set; }
-  }
+    public interface IToken {
+        SqlTokenType Type { get; set; }
+        string Value { get; set; }
+    }
 }

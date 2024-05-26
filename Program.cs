@@ -20,7 +20,7 @@ namespace CRTQL {
                 IndentString = "    ",
                 SpacesPerTab = 4,
                 MaxLineWidth = 999,
-                NewStatementLineBreaks = 2,
+                NewStatementLineBreaks = 4,
                 NewClauseLineBreaks = 1,
                 TrailingCommas = true,
                 SpaceAfterExpandedComma = false,

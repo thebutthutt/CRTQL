@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 namespace PoorMansTSqlFormatterLib.Interfaces {
-  public interface ISqlTokenFormatter {
-    string ErrorOutputPrefix { get; set; }
-    string FormatSQLTokens(ITokenList sqlTokenList);
-  }
+    public interface ISqlTokenFormatter {
+        string ErrorOutputPrefix { get; set; }
+        string FormatSQLTokens(ITokenList sqlTokenList);
+    }
 }

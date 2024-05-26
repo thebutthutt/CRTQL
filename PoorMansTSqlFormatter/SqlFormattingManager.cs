@@ -59,7 +59,7 @@ namespace PoorMansTSqlFormatterLib {
 
     public string Format(string inputSQL, ref bool errorEncountered) {
       Node sqlTree = Parser.ParseSQL(Tokenizer.TokenizeSQL(inputSQL));
-      errorEncountered = (sqlTree.GetAttributeValue(SqlStructureConstants.ANAME_ERRORFOUND) == "1");
+      errorEncountered = (sqlTree.GetAttributeValue(SqlElemNames.ANAME_ERRORFOUND) == "1");
       return Formatter.FormatSQLTree(sqlTree);
     }
 

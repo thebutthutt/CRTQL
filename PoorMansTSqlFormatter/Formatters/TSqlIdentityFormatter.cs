@@ -25,234 +25,235 @@ using PoorMansTSqlFormatterLib.ParseStructure;
 using PoorMansTSqlFormatterLib.Interfaces;
 
 namespace PoorMansTSqlFormatterLib.Formatters {
-  /// <summary>
-  /// This formatter is intended to output *exactly the same content as initially parsed*
-  /// </summary>
-  public class TSqlIdentityFormatter : ISqlTokenFormatter, ISqlTreeFormatter {
-    public TSqlIdentityFormatter() {
-      ErrorOutputPrefix = MessagingConstants.FormatErrorDefaultMessage + Environment.NewLine;
-    }
-
-    public string ErrorOutputPrefix { get; set; }
-
-    public string FormatSQLTree(Node sqlTreeDoc) {
-      BaseFormatterState state = new BaseFormatterState();
-
-      if (sqlTreeDoc.Name == SqlStructureConstants.ENAME_SQL_ROOT && sqlTreeDoc.GetAttributeValue(SqlStructureConstants.ANAME_ERRORFOUND) == "1")
-        state.AddOutputContent(ErrorOutputPrefix);
-
-      //pass "doc" itself into process: useful/necessary when formatting NOFORMAT sub-regions from standard formatter
-      ProcessSqlNodeList(new[] { sqlTreeDoc }, state);
-      return state.DumpOutput();
-    }
-
-    private static void ProcessSqlNodeList(IEnumerable<Node> rootList, BaseFormatterState state) {
-      foreach (Node contentElement in rootList)
-        ProcessSqlNode(state, contentElement);
-    }
-
-    private static void ProcessSqlNode(BaseFormatterState state, Node contentElement) {
-
-      switch (contentElement.Name) {
-        case SqlStructureConstants.ENAME_DDLDETAIL_PARENS:
-        case SqlStructureConstants.ENAME_DDL_PARENS:
-        case SqlStructureConstants.ENAME_FUNCTION_PARENS:
-        case SqlStructureConstants.ENAME_IN_PARENS:
-        case SqlStructureConstants.ENAME_EXPRESSION_PARENS:
-        case SqlStructureConstants.ENAME_SELECTIONTARGET_PARENS:
-          state.AddOutputContent("(");
-          ProcessSqlNodeList(contentElement.Children, state);
-          state.AddOutputContent(")");
-          break;
-
-        case SqlStructureConstants.ENAME_SQL_ROOT:
-        case SqlStructureConstants.ENAME_SQL_STATEMENT:
-        case SqlStructureConstants.ENAME_SQL_CLAUSE:
-        case SqlStructureConstants.ENAME_BOOLEAN_EXPRESSION:
-        case SqlStructureConstants.ENAME_DDL_PROCEDURAL_BLOCK:
-        case SqlStructureConstants.ENAME_DDL_OTHER_BLOCK:
-        case SqlStructureConstants.ENAME_DDL_DECLARE_BLOCK:
-        case SqlStructureConstants.ENAME_CURSOR_DECLARATION:
-        case SqlStructureConstants.ENAME_BEGIN_END_BLOCK:
-        case SqlStructureConstants.ENAME_TRY_BLOCK:
-        case SqlStructureConstants.ENAME_CATCH_BLOCK:
-        case SqlStructureConstants.ENAME_CASE_STATEMENT:
-        case SqlStructureConstants.ENAME_CASE_INPUT:
-        case SqlStructureConstants.ENAME_CASE_WHEN:
-        case SqlStructureConstants.ENAME_CASE_THEN:
-        case SqlStructureConstants.ENAME_CASE_ELSE:
-        case SqlStructureConstants.ENAME_IF_STATEMENT:
-        case SqlStructureConstants.ENAME_ELSE_CLAUSE:
-        case SqlStructureConstants.ENAME_WHILE_LOOP:
-        case SqlStructureConstants.ENAME_DDL_AS_BLOCK:
-        case SqlStructureConstants.ENAME_BETWEEN_CONDITION:
-        case SqlStructureConstants.ENAME_BETWEEN_LOWERBOUND:
-        case SqlStructureConstants.ENAME_BETWEEN_UPPERBOUND:
-        case SqlStructureConstants.ENAME_CTE_WITH_CLAUSE:
-        case SqlStructureConstants.ENAME_CTE_ALIAS:
-        case SqlStructureConstants.ENAME_CTE_AS_BLOCK:
-        case SqlStructureConstants.ENAME_CURSOR_FOR_BLOCK:
-        case SqlStructureConstants.ENAME_CURSOR_FOR_OPTIONS:
-        case SqlStructureConstants.ENAME_TRIGGER_CONDITION:
-        case SqlStructureConstants.ENAME_COMPOUNDKEYWORD:
-        case SqlStructureConstants.ENAME_BEGIN_TRANSACTION:
-        case SqlStructureConstants.ENAME_ROLLBACK_TRANSACTION:
-        case SqlStructureConstants.ENAME_SAVE_TRANSACTION:
-        case SqlStructureConstants.ENAME_COMMIT_TRANSACTION:
-        case SqlStructureConstants.ENAME_BATCH_SEPARATOR:
-        case SqlStructureConstants.ENAME_SET_OPERATOR_CLAUSE:
-        case SqlStructureConstants.ENAME_CONTAINER_OPEN:
-        case SqlStructureConstants.ENAME_CONTAINER_MULTISTATEMENT:
-        case SqlStructureConstants.ENAME_CONTAINER_SINGLESTATEMENT:
-        case SqlStructureConstants.ENAME_CONTAINER_GENERALCONTENT:
-        case SqlStructureConstants.ENAME_CONTAINER_CLOSE:
-        case SqlStructureConstants.ENAME_SELECTIONTARGET:
-        case SqlStructureConstants.ENAME_PERMISSIONS_BLOCK:
-        case SqlStructureConstants.ENAME_PERMISSIONS_DETAIL:
-        case SqlStructureConstants.ENAME_PERMISSIONS_TARGET:
-        case SqlStructureConstants.ENAME_PERMISSIONS_RECIPIENT:
-        case SqlStructureConstants.ENAME_DDL_WITH_CLAUSE:
-        case SqlStructureConstants.ENAME_MERGE_CLAUSE:
-        case SqlStructureConstants.ENAME_MERGE_TARGET:
-        case SqlStructureConstants.ENAME_MERGE_USING:
-        case SqlStructureConstants.ENAME_MERGE_CONDITION:
-        case SqlStructureConstants.ENAME_MERGE_WHEN:
-        case SqlStructureConstants.ENAME_MERGE_THEN:
-        case SqlStructureConstants.ENAME_MERGE_ACTION:
-        case SqlStructureConstants.ENAME_JOIN_ON_SECTION:
-        case SqlStructureConstants.ENAME_DDL_RETURNS:
-          foreach (Node childNode in contentElement.Children)
-            ProcessSqlNode(state, childNode);
-          break;
-
-        case SqlStructureConstants.ENAME_COMMENT_MULTILINE:
-          state.AddOutputContent("/*" + contentElement.TextValue + "*/");
-          break;
-        case SqlStructureConstants.ENAME_COMMENT_SINGLELINE:
-          state.AddOutputContent("--" + contentElement.TextValue);
-          break;
-        case SqlStructureConstants.ENAME_COMMENT_SINGLELINE_CSTYLE:
-          state.AddOutputContent("//" + contentElement.TextValue);
-          break;
-        case SqlStructureConstants.ENAME_STRING:
-          state.AddOutputContent("'" + contentElement.TextValue.Replace("'", "''") + "'");
-          break;
-        case SqlStructureConstants.ENAME_NSTRING:
-          state.AddOutputContent("N'" + contentElement.TextValue.Replace("'", "''") + "'");
-          break;
-        case SqlStructureConstants.ENAME_QUOTED_STRING:
-          state.AddOutputContent("\"" + contentElement.TextValue.Replace("\"", "\"\"") + "\"");
-          break;
-        case SqlStructureConstants.ENAME_BRACKET_QUOTED_NAME:
-          state.AddOutputContent("[" + contentElement.TextValue.Replace("]", "]]") + "]");
-          break;
-
-        case SqlStructureConstants.ENAME_COMMA:
-        case SqlStructureConstants.ENAME_PERIOD:
-        case SqlStructureConstants.ENAME_SEMICOLON:
-        case SqlStructureConstants.ENAME_ASTERISK:
-        case SqlStructureConstants.ENAME_EQUALSSIGN:
-        case SqlStructureConstants.ENAME_SCOPERESOLUTIONOPERATOR:
-        case SqlStructureConstants.ENAME_ALPHAOPERATOR:
-        case SqlStructureConstants.ENAME_OTHEROPERATOR:
-          state.AddOutputContent(contentElement.TextValue);
-          break;
-
-        case SqlStructureConstants.ENAME_AND_OPERATOR:
-        case SqlStructureConstants.ENAME_OR_OPERATOR:
-          state.AddOutputContent(contentElement.ChildByName(SqlStructureConstants.ENAME_OTHERKEYWORD).TextValue);
-          break;
-
-        case SqlStructureConstants.ENAME_FUNCTION_KEYWORD:
-          state.AddOutputContent(contentElement.TextValue);
-          break;
-
-        case SqlStructureConstants.ENAME_OTHERKEYWORD:
-        case SqlStructureConstants.ENAME_DATATYPE_KEYWORD:
-        case SqlStructureConstants.ENAME_PSEUDONAME:
-          state.AddOutputContent(contentElement.TextValue);
-          break;
-
-        case SqlStructureConstants.ENAME_OTHERNODE:
-        case SqlStructureConstants.ENAME_WHITESPACE:
-        case SqlStructureConstants.ENAME_NUMBER_VALUE:
-        case SqlStructureConstants.ENAME_MONETARY_VALUE:
-        case SqlStructureConstants.ENAME_BINARY_VALUE:
-        case SqlStructureConstants.ENAME_LABEL:
-          state.AddOutputContent(contentElement.TextValue);
-          break;
-        default:
-          throw new Exception("Unrecognized element in SQL Xml!");
-      }
-
-    }
-
-
-    public string FormatSQLTokens(ITokenList sqlTokenList) {
-      StringBuilder outString = new StringBuilder();
-
-      if (sqlTokenList.HasUnfinishedToken)
-        outString.Append(ErrorOutputPrefix);
-
-      foreach (var entry in sqlTokenList) {
-        switch (entry.Type) {
-          case SqlTokenType.MultiLineComment:
-            outString.Append("/*");
-            outString.Append(entry.Value);
-            outString.Append("*/");
-            break;
-          case SqlTokenType.SingleLineComment:
-            outString.Append("--");
-            outString.Append(entry.Value);
-            break;
-          case SqlTokenType.SingleLineCommentCStyle:
-            outString.Append("//");
-            outString.Append(entry.Value);
-            break;
-          case SqlTokenType.String:
-            outString.Append("'");
-            outString.Append(entry.Value.Replace("'", "''"));
-            outString.Append("'");
-            break;
-          case SqlTokenType.NationalString:
-            outString.Append("N'");
-            outString.Append(entry.Value.Replace("'", "''"));
-            outString.Append("'");
-            break;
-          case SqlTokenType.QuotedString:
-            outString.Append("\"");
-            outString.Append(entry.Value.Replace("\"", "\"\""));
-            outString.Append("\"");
-            break;
-          case SqlTokenType.BracketQuotedName:
-            outString.Append("[");
-            outString.Append(entry.Value.Replace("]", "]]"));
-            outString.Append("]");
-            break;
-
-          case SqlTokenType.OpenParens:
-          case SqlTokenType.CloseParens:
-          case SqlTokenType.Comma:
-          case SqlTokenType.Period:
-          case SqlTokenType.Semicolon:
-          case SqlTokenType.Colon:
-          case SqlTokenType.Asterisk:
-          case SqlTokenType.EqualsSign:
-          case SqlTokenType.OtherNode:
-          case SqlTokenType.WhiteSpace:
-          case SqlTokenType.OtherOperator:
-          case SqlTokenType.Number:
-          case SqlTokenType.BinaryValue:
-          case SqlTokenType.MonetaryValue:
-          case SqlTokenType.PseudoName:
-            outString.Append(entry.Value);
-            break;
-          default:
-            throw new Exception("Unrecognized Token Type in Token List!");
+    /// <summary>
+    /// This formatter is intended to output *exactly the same content as initially parsed*
+    /// </summary>
+    public class TSqlIdentityFormatter : ISqlTokenFormatter, ISqlTreeFormatter {
+        public TSqlIdentityFormatter() {
+            ErrorOutputPrefix = MessagingConstants.FormatErrorDefaultMessage + Environment.NewLine;
         }
-      }
 
-      return outString.ToString();
+        public string ErrorOutputPrefix { get; set; }
+
+        public string FormatSQLTree(Node sqlTreeDoc) {
+            BaseFormatterState state = new BaseFormatterState();
+
+            if (sqlTreeDoc.Name == SqlElemNames.SQL_ROOT && sqlTreeDoc.GetAttributeValue(SqlElemNames.ANAME_ERRORFOUND) == "1")
+                state.AddOutputContent(ErrorOutputPrefix);
+
+            //pass "doc" itself into process: useful/necessary when formatting NOFORMAT sub-regions from standard formatter
+            ProcessSqlNodeList(new[] { sqlTreeDoc }, state);
+            return state.DumpOutput();
+        }
+
+        private static void ProcessSqlNodeList(IEnumerable<Node> rootList, BaseFormatterState state) {
+            foreach (Node contentElement in rootList)
+                ProcessSqlNode(state, contentElement);
+        }
+
+        private static void ProcessSqlNode(BaseFormatterState state, Node contentElement) {
+
+            switch (contentElement.Name) {
+                case SqlElemNames.DDLDETAIL_PARENS:
+                case SqlElemNames.DDL_PARENS:
+                case SqlElemNames.FUNCTION_PARENS:
+                case SqlElemNames.IN_PARENS:
+                case SqlElemNames.EXPRESSION_PARENS:
+                case SqlElemNames.SELECTIONTARGET_PARENS:
+                    state.AddOutputContent("(");
+                    ProcessSqlNodeList(contentElement.Children, state);
+                    state.AddOutputContent(")");
+                    break;
+
+                case SqlElemNames.SQL_ROOT:
+                case SqlElemNames.SQL_STATEMENT:
+                case SqlElemNames.SQL_CLAUSE:
+                case SqlElemNames.BOOLEAN_EXPRESSION:
+                case SqlElemNames.DDL_PROCEDURAL_BLOCK:
+                case SqlElemNames.DDL_OTHER_BLOCK:
+                case SqlElemNames.DDL_DECLARE_BLOCK:
+                case SqlElemNames.CURSOR_DECLARATION:
+                case SqlElemNames.BEGIN_END_BLOCK:
+                case SqlElemNames.TRY_BLOCK:
+                case SqlElemNames.CATCH_BLOCK:
+                case SqlElemNames.CASE_STATEMENT:
+                case SqlElemNames.CASE_INPUT:
+                case SqlElemNames.CASE_WHEN:
+                case SqlElemNames.CASE_THEN:
+                case SqlElemNames.CASE_ELSE:
+                case SqlElemNames.IF_STATEMENT:
+                case SqlElemNames.ELSE_CLAUSE:
+                case SqlElemNames.WHILE_LOOP:
+                case SqlElemNames.DDL_AS_BLOCK:
+                case SqlElemNames.BETWEEN_CONDITION:
+                case SqlElemNames.BETWEEN_LOWERBOUND:
+                case SqlElemNames.BETWEEN_UPPERBOUND:
+                case SqlElemNames.CTE_WITH_CLAUSE:
+                case SqlElemNames.CTE_ALIAS:
+                case SqlElemNames.CTE_AS_BLOCK:
+                case SqlElemNames.CURSOR_FOR_BLOCK:
+                case SqlElemNames.CURSOR_FOR_OPTIONS:
+                case SqlElemNames.TRIGGER_CONDITION:
+                case SqlElemNames.COMPOUNDKEYWORD:
+                case SqlElemNames.BEGIN_TRANSACTION:
+                case SqlElemNames.ROLLBACK_TRANSACTION:
+                case SqlElemNames.SAVE_TRANSACTION:
+                case SqlElemNames.COMMIT_TRANSACTION:
+                case SqlElemNames.BATCH_SEPARATOR:
+                case SqlElemNames.SET_OPERATOR_CLAUSE:
+                case SqlElemNames.CONTAINER_OPEN:
+                case SqlElemNames.CONTAINER_MULTISTATEMENT:
+                case SqlElemNames.CONTAINER_SINGLESTATEMENT:
+                case SqlElemNames.CONTAINER_GENERALCONTENT:
+                case SqlElemNames.CONTAINER_CLOSE:
+                case SqlElemNames.SELECTIONTARGET:
+                case SqlElemNames.PERMISSIONS_BLOCK:
+                case SqlElemNames.PERMISSIONS_DETAIL:
+                case SqlElemNames.PERMISSIONS_TARGET:
+                case SqlElemNames.PERMISSIONS_RECIPIENT:
+                case SqlElemNames.DDL_WITH_CLAUSE:
+                case SqlElemNames.MERGE_CLAUSE:
+                case SqlElemNames.MERGE_TARGET:
+                case SqlElemNames.MERGE_USING:
+                case SqlElemNames.MERGE_CONDITION:
+                case SqlElemNames.MERGE_WHEN:
+                case SqlElemNames.MERGE_THEN:
+                case SqlElemNames.MERGE_ACTION:
+                case SqlElemNames.JOIN_TARGET:
+                case SqlElemNames.JOIN_ON_SECTION:
+                case SqlElemNames.DDL_RETURNS:
+                    foreach (Node childNode in contentElement.Children)
+                        ProcessSqlNode(state, childNode);
+                    break;
+
+                case SqlElemNames.COMMENT_MULTILINE:
+                    state.AddOutputContent("/*" + contentElement.TextValue + "*/");
+                    break;
+                case SqlElemNames.COMMENT_SINGLELINE:
+                    state.AddOutputContent("--" + contentElement.TextValue);
+                    break;
+                case SqlElemNames.COMMENT_SINGLELINE_CSTYLE:
+                    state.AddOutputContent("//" + contentElement.TextValue);
+                    break;
+                case SqlElemNames.STRING:
+                    state.AddOutputContent("'" + contentElement.TextValue.Replace("'", "''") + "'");
+                    break;
+                case SqlElemNames.NSTRING:
+                    state.AddOutputContent("N'" + contentElement.TextValue.Replace("'", "''") + "'");
+                    break;
+                case SqlElemNames.QUOTED_STRING:
+                    state.AddOutputContent("\"" + contentElement.TextValue.Replace("\"", "\"\"") + "\"");
+                    break;
+                case SqlElemNames.BRACKET_QUOTED_NAME:
+                    state.AddOutputContent("[" + contentElement.TextValue.Replace("]", "]]") + "]");
+                    break;
+
+                case SqlElemNames.COMMA:
+                case SqlElemNames.PERIOD:
+                case SqlElemNames.SEMICOLON:
+                case SqlElemNames.ASTERISK:
+                case SqlElemNames.EQUALSSIGN:
+                case SqlElemNames.SCOPERESOLUTIONOPERATOR:
+                case SqlElemNames.ALPHAOPERATOR:
+                case SqlElemNames.OTHEROPERATOR:
+                    state.AddOutputContent(contentElement.TextValue);
+                    break;
+
+                case SqlElemNames.AND_OPERATOR:
+                case SqlElemNames.OR_OPERATOR:
+                    state.AddOutputContent(contentElement.ChildByName(SqlElemNames.OTHERKEYWORD).TextValue);
+                    break;
+
+                case SqlElemNames.FUNCTION_KEYWORD:
+                    state.AddOutputContent(contentElement.TextValue);
+                    break;
+
+                case SqlElemNames.OTHERKEYWORD:
+                case SqlElemNames.DATATYPE_KEYWORD:
+                case SqlElemNames.PSEUDONAME:
+                    state.AddOutputContent(contentElement.TextValue);
+                    break;
+
+                case SqlElemNames.OTHERNODE:
+                case SqlElemNames.WHITESPACE:
+                case SqlElemNames.NUMBER_VALUE:
+                case SqlElemNames.MONETARY_VALUE:
+                case SqlElemNames.BINARY_VALUE:
+                case SqlElemNames.LABEL:
+                    state.AddOutputContent(contentElement.TextValue);
+                    break;
+                default:
+                    throw new Exception("Unrecognized element in SQL Xml!");
+            }
+
+        }
+
+
+        public string FormatSQLTokens(ITokenList sqlTokenList) {
+            StringBuilder outString = new StringBuilder();
+
+            if (sqlTokenList.HasUnfinishedToken)
+                outString.Append(ErrorOutputPrefix);
+
+            foreach (var entry in sqlTokenList) {
+                switch (entry.Type) {
+                    case SqlTokenType.MultiLineComment:
+                        outString.Append("/*");
+                        outString.Append(entry.Value);
+                        outString.Append("*/");
+                        break;
+                    case SqlTokenType.SingleLineComment:
+                        outString.Append("--");
+                        outString.Append(entry.Value);
+                        break;
+                    case SqlTokenType.SingleLineCommentCStyle:
+                        outString.Append("//");
+                        outString.Append(entry.Value);
+                        break;
+                    case SqlTokenType.String:
+                        outString.Append("'");
+                        outString.Append(entry.Value.Replace("'", "''"));
+                        outString.Append("'");
+                        break;
+                    case SqlTokenType.NationalString:
+                        outString.Append("N'");
+                        outString.Append(entry.Value.Replace("'", "''"));
+                        outString.Append("'");
+                        break;
+                    case SqlTokenType.QuotedString:
+                        outString.Append("\"");
+                        outString.Append(entry.Value.Replace("\"", "\"\""));
+                        outString.Append("\"");
+                        break;
+                    case SqlTokenType.BracketQuotedName:
+                        outString.Append("[");
+                        outString.Append(entry.Value.Replace("]", "]]"));
+                        outString.Append("]");
+                        break;
+
+                    case SqlTokenType.OpenParens:
+                    case SqlTokenType.CloseParens:
+                    case SqlTokenType.Comma:
+                    case SqlTokenType.Period:
+                    case SqlTokenType.Semicolon:
+                    case SqlTokenType.Colon:
+                    case SqlTokenType.Asterisk:
+                    case SqlTokenType.EqualsSign:
+                    case SqlTokenType.OtherNode:
+                    case SqlTokenType.WhiteSpace:
+                    case SqlTokenType.OtherOperator:
+                    case SqlTokenType.Number:
+                    case SqlTokenType.BinaryValue:
+                    case SqlTokenType.MonetaryValue:
+                    case SqlTokenType.PseudoName:
+                        outString.Append(entry.Value);
+                        break;
+                    default:
+                        throw new Exception("Unrecognized Token Type in Token List!");
+                }
+            }
+
+            return outString.ToString();
+        }
     }
-  }
 }

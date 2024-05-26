@@ -28,21 +28,21 @@ using System.Linq;
 namespace PoorMansTSqlFormatterLib.Formatters {
     public class TSqlStandardFormatterOptions {
         public TSqlStandardFormatterOptions() {
-            IndentString = "\t";
+            IndentString = "    ";
             SpacesPerTab = 4;
-            MaxLineWidth = 999;
+            MaxLineWidth = 9999;
             ExpandCommaLists = true;
-            TrailingCommas = false;
+            TrailingCommas = true;
             SpaceAfterExpandedComma = false;
             ExpandBooleanExpressions = true;
             ExpandBetweenConditions = true;
             ExpandCaseStatements = true;
             UppercaseKeywords = true;
-            BreakJoinOnSections = false;
+            BreakJoinOnSections = true;
             KeywordStandardization = false;
             ExpandInLists = true;
             NewClauseLineBreaks = 1;
-            NewStatementLineBreaks = 2;
+            NewStatementLineBreaks = 4;
             WrapNamesInBraces = true;
         }
 

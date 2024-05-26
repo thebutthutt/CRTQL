@@ -21,8 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using PoorMansTSqlFormatterLib.ParseStructure;
 
 namespace PoorMansTSqlFormatterLib.Interfaces {
-  public interface ISqlTreeFormatter {
-    string ErrorOutputPrefix { get; set; }
-    string FormatSQLTree(Node sqlTree);
-  }
+    public interface ISqlTreeFormatter {
+        string ErrorOutputPrefix { get; set; }
+        string FormatSQLTree(Node sqlTree);
+    }
 }

@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 namespace PoorMansTSqlFormatterLib.Interfaces {
-  public interface ISqlTokenizer {
-    ITokenList TokenizeSQL(string inputSQL);
-    ITokenList TokenizeSQL(string inputSQL, long? requestedMarkerPosition);
-  }
+    public interface ISqlTokenizer {
+        ITokenList TokenizeSQL(string inputSQL);
+        ITokenList TokenizeSQL(string inputSQL, long? requestedMarkerPosition);
+    }
 }

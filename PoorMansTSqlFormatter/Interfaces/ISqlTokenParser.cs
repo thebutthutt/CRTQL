@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using PoorMansTSqlFormatterLib.ParseStructure;
 
 namespace PoorMansTSqlFormatterLib.Interfaces {
-  public interface ISqlTokenParser {
-    Node ParseSQL(ITokenList tokenList);
-  }
+    public interface ISqlTokenParser {
+        Node ParseSQL(ITokenList tokenList);
+    }
 }

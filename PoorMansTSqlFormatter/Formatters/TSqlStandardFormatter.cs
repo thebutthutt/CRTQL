@@ -61,7 +61,7 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                                                                                 Options.MaxLineWidth,
                                                                                 0);
 
-            if (sqlTreeDoc.Name == SqlStructureConstants.ENAME_SQL_ROOT && sqlTreeDoc.GetAttributeValue(SqlStructureConstants.ANAME_ERRORFOUND) == "1")
+            if (sqlTreeDoc.Name == SqlElemNames.SQL_ROOT && sqlTreeDoc.GetAttributeValue(SqlElemNames.ANAME_ERRORFOUND) == "1")
                 state.AddOutputContent(ErrorOutputPrefix);
 
             ProcessSqlNodeList(sqlTreeDoc.Children, state);
@@ -92,14 +92,14 @@ namespace PoorMansTSqlFormatterLib.Formatters {
 
 
             switch (contentElement.Name) {
-                case SqlStructureConstants.ENAME_SQL_STATEMENT:
+                case SqlElemNames.SQL_STATEMENT:
                     WhiteSpace_SeparateStatements(contentElement, state);
                     state.ResetKeywords();
                     ProcessSqlNodeList(contentElement.Children, state);
                     state.StatementBreakExpected = true;
                     break;
 
-                case SqlStructureConstants.ENAME_SQL_CLAUSE:
+                case SqlElemNames.SQL_CLAUSE:
                     state.UnIndentInitialBreak = true;
                     ProcessSqlNodeList(contentElement.Children, state.IncrementIndent());
                     state.DecrementIndent();
@@ -109,7 +109,7 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                         state.AdditionalBreaksExpected = Options.NewClauseLineBreaks - 1;
                     break;
 
-                case SqlStructureConstants.ENAME_SET_OPERATOR_CLAUSE:
+                case SqlElemNames.SET_OPERATOR_CLAUSE:
                     state.DecrementIndent();
                     state.WhiteSpace_BreakToNextLine(); //this is the one already recommended by the start of the clause
                     state.WhiteSpace_BreakToNextLine(); //this is the one we additionally want to apply
@@ -118,60 +118,60 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                     state.AdditionalBreaksExpected = 1;
                     break;
 
-                case SqlStructureConstants.ENAME_BATCH_SEPARATOR:
+                case SqlElemNames.BATCH_SEPARATOR:
                     //newline regardless of whether previous element recommended a break or not.
                     state.WhiteSpace_BreakToNextLine();
                     ProcessSqlNodeList(contentElement.Children, state);
                     state.BreakExpected = true;
                     break;
 
-                case SqlStructureConstants.ENAME_DDL_PROCEDURAL_BLOCK:
-                case SqlStructureConstants.ENAME_DDL_OTHER_BLOCK:
-                case SqlStructureConstants.ENAME_DDL_DECLARE_BLOCK:
-                case SqlStructureConstants.ENAME_CURSOR_DECLARATION:
-                case SqlStructureConstants.ENAME_BEGIN_TRANSACTION:
-                case SqlStructureConstants.ENAME_SAVE_TRANSACTION:
-                case SqlStructureConstants.ENAME_COMMIT_TRANSACTION:
-                case SqlStructureConstants.ENAME_ROLLBACK_TRANSACTION:
-                case SqlStructureConstants.ENAME_CONTAINER_OPEN:
-                case SqlStructureConstants.ENAME_CONTAINER_CLOSE:
-                case SqlStructureConstants.ENAME_WHILE_LOOP:
-                case SqlStructureConstants.ENAME_IF_STATEMENT:
-                case SqlStructureConstants.ENAME_CONTAINER_GENERALCONTENT:
-                case SqlStructureConstants.ENAME_CTE_WITH_CLAUSE:
-                case SqlStructureConstants.ENAME_PERMISSIONS_BLOCK:
-                case SqlStructureConstants.ENAME_PERMISSIONS_DETAIL:
-                case SqlStructureConstants.ENAME_MERGE_CLAUSE:
-                case SqlStructureConstants.ENAME_MERGE_TARGET:
+                case SqlElemNames.DDL_PROCEDURAL_BLOCK:
+                case SqlElemNames.DDL_OTHER_BLOCK:
+                case SqlElemNames.DDL_DECLARE_BLOCK:
+                case SqlElemNames.CURSOR_DECLARATION:
+                case SqlElemNames.BEGIN_TRANSACTION:
+                case SqlElemNames.SAVE_TRANSACTION:
+                case SqlElemNames.COMMIT_TRANSACTION:
+                case SqlElemNames.ROLLBACK_TRANSACTION:
+                case SqlElemNames.CONTAINER_OPEN:
+                case SqlElemNames.CONTAINER_CLOSE:
+                case SqlElemNames.WHILE_LOOP:
+                case SqlElemNames.IF_STATEMENT:
+                case SqlElemNames.CONTAINER_GENERALCONTENT:
+                case SqlElemNames.CTE_WITH_CLAUSE:
+                case SqlElemNames.PERMISSIONS_BLOCK:
+                case SqlElemNames.PERMISSIONS_DETAIL:
+                case SqlElemNames.MERGE_CLAUSE:
+                case SqlElemNames.MERGE_TARGET:
                     ProcessSqlNodeList(contentElement.Children, state);
                     break;
 
-                case SqlStructureConstants.ENAME_SELECTIONTARGET:
+                case SqlElemNames.SELECTIONTARGET:
                     state.BreakExpected = true;
                     //state.IncrementIndent();
                     ProcessSqlNodeList(contentElement.Children, state);
                     //state.DecrementIndent();
                     break;
 
-                case SqlStructureConstants.ENAME_CASE_INPUT:
-                case SqlStructureConstants.ENAME_BOOLEAN_EXPRESSION:
-                case SqlStructureConstants.ENAME_BETWEEN_LOWERBOUND:
-                case SqlStructureConstants.ENAME_BETWEEN_UPPERBOUND:
+                case SqlElemNames.CASE_INPUT:
+                case SqlElemNames.BOOLEAN_EXPRESSION:
+                case SqlElemNames.BETWEEN_LOWERBOUND:
+                case SqlElemNames.BETWEEN_UPPERBOUND:
                     WhiteSpace_SeparateWords(state);
                     ProcessSqlNodeList(contentElement.Children, state);
                     break;
 
-                case SqlStructureConstants.ENAME_CONTAINER_SINGLESTATEMENT:
-                case SqlStructureConstants.ENAME_CONTAINER_MULTISTATEMENT:
-                case SqlStructureConstants.ENAME_MERGE_ACTION:
+                case SqlElemNames.CONTAINER_SINGLESTATEMENT:
+                case SqlElemNames.CONTAINER_MULTISTATEMENT:
+                case SqlElemNames.MERGE_ACTION:
 
                     bool singleStatementIsIf = false;
-                    foreach (Node statement in contentElement.ChildrenByName(SqlStructureConstants.ENAME_SQL_STATEMENT))
-                        foreach (Node clause in statement.ChildrenByName(SqlStructureConstants.ENAME_SQL_CLAUSE))
-                            foreach (Node ifStatement in clause.ChildrenByName(SqlStructureConstants.ENAME_IF_STATEMENT))
+                    foreach (Node statement in contentElement.ChildrenByName(SqlElemNames.SQL_STATEMENT))
+                        foreach (Node clause in statement.ChildrenByName(SqlElemNames.SQL_CLAUSE))
+                            foreach (Node ifStatement in clause.ChildrenByName(SqlElemNames.IF_STATEMENT))
                                 singleStatementIsIf = true;
 
-                    if (singleStatementIsIf && contentElement.Parent.Name.Equals(SqlStructureConstants.ENAME_ELSE_CLAUSE)) {
+                    if (singleStatementIsIf && contentElement.Parent.Name.Equals(SqlElemNames.ELSE_CLAUSE)) {
                         //artificially decrement indent and skip new statement break for "ELSE IF" constructs
                         state.DecrementIndent();
                     }
@@ -179,7 +179,7 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                         state.BreakExpected = true;
                     }
                     ProcessSqlNodeList(contentElement.Children, state);
-                    if (singleStatementIsIf && contentElement.Parent.Name.Equals(SqlStructureConstants.ENAME_ELSE_CLAUSE)) {
+                    if (singleStatementIsIf && contentElement.Parent.Name.Equals(SqlElemNames.ELSE_CLAUSE)) {
                         //bring indent back to symmetrical level
                         state.IncrementIndent();
                     }
@@ -188,82 +188,85 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                     state.UnIndentInitialBreak = false; //if there was no word spacing after the last content statement's clause starter, doesn't mean the unIndent should propagate to the following content!
                     break;
 
-                case SqlStructureConstants.ENAME_PERMISSIONS_TARGET:
-                case SqlStructureConstants.ENAME_PERMISSIONS_RECIPIENT:
-                case SqlStructureConstants.ENAME_DDL_WITH_CLAUSE:
-                case SqlStructureConstants.ENAME_MERGE_CONDITION:
-                case SqlStructureConstants.ENAME_MERGE_THEN:
+                case SqlElemNames.PERMISSIONS_TARGET:
+                case SqlElemNames.PERMISSIONS_RECIPIENT:
+                case SqlElemNames.DDL_WITH_CLAUSE:
+                case SqlElemNames.MERGE_CONDITION:
+                case SqlElemNames.MERGE_THEN:
                     state.BreakExpected = true;
                     state.UnIndentInitialBreak = true;
                     ProcessSqlNodeList(contentElement.Children, state.IncrementIndent());
                     state.DecrementIndent();
                     break;
 
-                case SqlStructureConstants.ENAME_JOIN_ON_SECTION:
-                    if (Options.BreakJoinOnSections)
-                        state.BreakExpected = true;
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlStructureConstants.ENAME_CONTAINER_OPEN), state);
-                    if (Options.BreakJoinOnSections)
-                        state.IncrementIndent();
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlStructureConstants.ENAME_CONTAINER_GENERALCONTENT), state);
-                    if (Options.BreakJoinOnSections)
-                        state.DecrementIndent();
+                case SqlElemNames.JOIN_TARGET:
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CONTAINER_OPEN), state);
+                    state.IncrementIndent();
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CONTAINER_GENERALCONTENT), state);
                     break;
 
-                case SqlStructureConstants.ENAME_CTE_ALIAS:
+                case SqlElemNames.JOIN_ON_SECTION:
+                    state.BreakExpected = true;
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CONTAINER_OPEN), state);
+                    //state.IncrementIndent();
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CONTAINER_GENERALCONTENT), state);
+                    state.DecrementIndent();
+                    break;
+
+                case SqlElemNames.CTE_ALIAS:
                     state.UnIndentInitialBreak = true;
                     ProcessSqlNodeList(contentElement.Children, state);
                     break;
 
-                case SqlStructureConstants.ENAME_ELSE_CLAUSE:
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlStructureConstants.ENAME_CONTAINER_OPEN), state.DecrementIndent());
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlStructureConstants.ENAME_CONTAINER_SINGLESTATEMENT), state.IncrementIndent());
+                case SqlElemNames.ELSE_CLAUSE:
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CONTAINER_OPEN), state.DecrementIndent());
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CONTAINER_SINGLESTATEMENT), state.IncrementIndent());
                     break;
 
-                case SqlStructureConstants.ENAME_DDL_AS_BLOCK:
-                case SqlStructureConstants.ENAME_CURSOR_FOR_BLOCK:
+                case SqlElemNames.DDL_AS_BLOCK:
+                case SqlElemNames.CURSOR_FOR_BLOCK:
                     state.BreakExpected = true;
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlStructureConstants.ENAME_CONTAINER_OPEN), state.DecrementIndent());
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CONTAINER_OPEN), state.DecrementIndent());
                     state.BreakExpected = true;
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlStructureConstants.ENAME_CONTAINER_GENERALCONTENT), state);
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CONTAINER_GENERALCONTENT), state);
                     state.IncrementIndent();
                     break;
 
-                case SqlStructureConstants.ENAME_TRIGGER_CONDITION:
+                case SqlElemNames.TRIGGER_CONDITION:
                     state.DecrementIndent();
                     state.WhiteSpace_BreakToNextLine();
                     ProcessSqlNodeList(contentElement.Children, state.IncrementIndent());
                     break;
 
-                case SqlStructureConstants.ENAME_CURSOR_FOR_OPTIONS:
-                case SqlStructureConstants.ENAME_CTE_AS_BLOCK:
+                case SqlElemNames.CURSOR_FOR_OPTIONS:
+                case SqlElemNames.CTE_AS_BLOCK:
                     state.BreakExpected = true;
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlStructureConstants.ENAME_CONTAINER_OPEN), state.DecrementIndent());
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlStructureConstants.ENAME_CONTAINER_GENERALCONTENT), state.IncrementIndent());
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CONTAINER_OPEN), state.DecrementIndent());
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CONTAINER_GENERALCONTENT), state.IncrementIndent());
                     break;
 
-                case SqlStructureConstants.ENAME_DDL_RETURNS:
-                case SqlStructureConstants.ENAME_MERGE_USING:
-                case SqlStructureConstants.ENAME_MERGE_WHEN:
+                case SqlElemNames.DDL_RETURNS:
+                case SqlElemNames.MERGE_USING:
+                case SqlElemNames.MERGE_WHEN:
                     state.BreakExpected = true;
                     state.UnIndentInitialBreak = true;
                     ProcessSqlNodeList(contentElement.Children, state);
                     break;
 
-                case SqlStructureConstants.ENAME_BETWEEN_CONDITION:
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlStructureConstants.ENAME_CONTAINER_OPEN), state);
+                case SqlElemNames.BETWEEN_CONDITION:
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CONTAINER_OPEN), state);
                     state.IncrementIndent();
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlStructureConstants.ENAME_BETWEEN_LOWERBOUND), state.IncrementIndent());
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.BETWEEN_LOWERBOUND), state.IncrementIndent());
                     if (Options.ExpandBetweenConditions)
                         state.BreakExpected = true;
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlStructureConstants.ENAME_CONTAINER_CLOSE), state.DecrementIndent());
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlStructureConstants.ENAME_BETWEEN_UPPERBOUND), state.IncrementIndent());
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CONTAINER_CLOSE), state.DecrementIndent());
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.BETWEEN_UPPERBOUND), state.IncrementIndent());
                     state.DecrementIndent();
                     state.DecrementIndent();
                     break;
 
-                case SqlStructureConstants.ENAME_DDLDETAIL_PARENS:
-                case SqlStructureConstants.ENAME_FUNCTION_PARENS:
+                case SqlElemNames.DDLDETAIL_PARENS:
+                case SqlElemNames.FUNCTION_PARENS:
                     //simply process sub-nodes - don't add space or expect any linebreaks (but respect linebreaks if necessary)
                     state.WordSeparatorExpected = false;
                     WhiteSpace_BreakAsExpected(state);
@@ -275,12 +278,12 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                     state.WordSeparatorExpected = true;
                     break;
 
-                case SqlStructureConstants.ENAME_DDL_PARENS:
-                case SqlStructureConstants.ENAME_EXPRESSION_PARENS:
-                case SqlStructureConstants.ENAME_SELECTIONTARGET_PARENS:
-                case SqlStructureConstants.ENAME_IN_PARENS:
+                case SqlElemNames.DDL_PARENS:
+                case SqlElemNames.EXPRESSION_PARENS:
+                case SqlElemNames.SELECTIONTARGET_PARENS:
+                case SqlElemNames.IN_PARENS:
                     WhiteSpace_SeparateWords(state);
-                    if (contentElement.Name.Equals(SqlStructureConstants.ENAME_EXPRESSION_PARENS) || contentElement.Name.Equals(SqlStructureConstants.ENAME_IN_PARENS))
+                    if (contentElement.Name.Equals(SqlElemNames.EXPRESSION_PARENS) || contentElement.Name.Equals(SqlElemNames.IN_PARENS))
                         state.IncrementIndent();
                     state.AddOutputContent(FormatOperator("("));
                     TSqlStandardFormattingState innerState = new TSqlStandardFormattingState(state);
@@ -296,63 +299,63 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                         state.Assimilate(innerState);
                     }
                     state.AddOutputContent(FormatOperator(")"));
-                    if (contentElement.Name.Equals(SqlStructureConstants.ENAME_EXPRESSION_PARENS) || contentElement.Name.Equals(SqlStructureConstants.ENAME_IN_PARENS))
+                    if (contentElement.Name.Equals(SqlElemNames.EXPRESSION_PARENS) || contentElement.Name.Equals(SqlElemNames.IN_PARENS))
                         state.DecrementIndent();
                     state.WordSeparatorExpected = true;
                     break;
 
-                case SqlStructureConstants.ENAME_BEGIN_END_BLOCK:
-                case SqlStructureConstants.ENAME_TRY_BLOCK:
-                case SqlStructureConstants.ENAME_CATCH_BLOCK:
-                    if (contentElement.Parent.Name.Equals(SqlStructureConstants.ENAME_SQL_CLAUSE)
-                        && contentElement.Parent.Parent.Name.Equals(SqlStructureConstants.ENAME_SQL_STATEMENT)
-                        && contentElement.Parent.Parent.Parent.Name.Equals(SqlStructureConstants.ENAME_CONTAINER_SINGLESTATEMENT)
+                case SqlElemNames.BEGIN_END_BLOCK:
+                case SqlElemNames.TRY_BLOCK:
+                case SqlElemNames.CATCH_BLOCK:
+                    if (contentElement.Parent.Name.Equals(SqlElemNames.SQL_CLAUSE)
+                        && contentElement.Parent.Parent.Name.Equals(SqlElemNames.SQL_STATEMENT)
+                        && contentElement.Parent.Parent.Parent.Name.Equals(SqlElemNames.CONTAINER_SINGLESTATEMENT)
                         )
                         state.DecrementIndent();
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlStructureConstants.ENAME_CONTAINER_OPEN), state);
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlStructureConstants.ENAME_CONTAINER_MULTISTATEMENT), state);
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CONTAINER_OPEN), state);
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CONTAINER_MULTISTATEMENT), state);
                     state.DecrementIndent();
                     state.BreakExpected = true;
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlStructureConstants.ENAME_CONTAINER_CLOSE), state);
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CONTAINER_CLOSE), state);
                     state.IncrementIndent();
-                    if (contentElement.Parent.Name.Equals(SqlStructureConstants.ENAME_SQL_CLAUSE)
-                        && contentElement.Parent.Parent.Name.Equals(SqlStructureConstants.ENAME_SQL_STATEMENT)
-                        && contentElement.Parent.Parent.Parent.Name.Equals(SqlStructureConstants.ENAME_CONTAINER_SINGLESTATEMENT)
+                    if (contentElement.Parent.Name.Equals(SqlElemNames.SQL_CLAUSE)
+                        && contentElement.Parent.Parent.Name.Equals(SqlElemNames.SQL_STATEMENT)
+                        && contentElement.Parent.Parent.Parent.Name.Equals(SqlElemNames.CONTAINER_SINGLESTATEMENT)
                         )
                         state.IncrementIndent();
                     break;
 
-                case SqlStructureConstants.ENAME_CASE_STATEMENT:
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlStructureConstants.ENAME_CONTAINER_OPEN), state);
+                case SqlElemNames.CASE_STATEMENT:
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CONTAINER_OPEN), state);
                     state.IncrementIndent();
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlStructureConstants.ENAME_CASE_INPUT), state);
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlStructureConstants.ENAME_CASE_WHEN), state);
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlStructureConstants.ENAME_CASE_ELSE), state);
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CASE_INPUT), state);
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CASE_WHEN), state);
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CASE_ELSE), state);
                     if (Options.ExpandCaseStatements)
                         state.BreakExpected = true;
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlStructureConstants.ENAME_CONTAINER_CLOSE), state);
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CONTAINER_CLOSE), state);
                     state.DecrementIndent();
                     break;
 
-                case SqlStructureConstants.ENAME_CASE_WHEN:
-                case SqlStructureConstants.ENAME_CASE_THEN:
-                case SqlStructureConstants.ENAME_CASE_ELSE:
+                case SqlElemNames.CASE_WHEN:
+                case SqlElemNames.CASE_THEN:
+                case SqlElemNames.CASE_ELSE:
                     if (Options.ExpandCaseStatements)
                         state.BreakExpected = true;
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlStructureConstants.ENAME_CONTAINER_OPEN), state);
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlStructureConstants.ENAME_CONTAINER_GENERALCONTENT), state.IncrementIndent());
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlStructureConstants.ENAME_CASE_THEN), state);
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CONTAINER_OPEN), state);
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CONTAINER_GENERALCONTENT), state.IncrementIndent());
+                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CASE_THEN), state);
                     state.DecrementIndent();
                     break;
 
-                case SqlStructureConstants.ENAME_AND_OPERATOR:
-                case SqlStructureConstants.ENAME_OR_OPERATOR:
+                case SqlElemNames.AND_OPERATOR:
+                case SqlElemNames.OR_OPERATOR:
                     if (Options.ExpandBooleanExpressions)
                         state.BreakExpected = true;
-                    ProcessSqlNode(contentElement.ChildByName(SqlStructureConstants.ENAME_OTHERKEYWORD), state);
+                    ProcessSqlNode(contentElement.ChildByName(SqlElemNames.OTHERKEYWORD), state);
                     break;
 
-                case SqlStructureConstants.ENAME_COMMENT_MULTILINE:
+                case SqlElemNames.COMMENT_MULTILINE:
                     if (state.SpecialRegionActive == SpecialRegionType.NoFormat && contentElement.TextValue.ToUpperInvariant().Contains("[/NOFORMAT]")) {
                         Node skippedXml = NodeExtensions.ExtractStructureBetween(state.RegionStartNode, contentElement);
                         if (skippedXml != null) {
@@ -378,9 +381,9 @@ namespace PoorMansTSqlFormatterLib.Formatters {
 
                     WhiteSpace_SeparateComment(contentElement, state);
                     state.AddOutputContent("/*" + contentElement.TextValue + "*/");
-                    if (contentElement.Parent.Name.Equals(SqlStructureConstants.ENAME_SQL_STATEMENT)
+                    if (contentElement.Parent.Name.Equals(SqlElemNames.SQL_STATEMENT)
                         || (contentElement.NextSibling() != null
-                            && contentElement.NextSibling().Name.Equals(SqlStructureConstants.ENAME_WHITESPACE)
+                            && contentElement.NextSibling().Name.Equals(SqlElemNames.WHITESPACE)
                             && Regex.IsMatch(contentElement.NextSibling().TextValue, @"(\r|\n)+")
                             )
                         )
@@ -403,8 +406,8 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                     }
                     break;
 
-                case SqlStructureConstants.ENAME_COMMENT_SINGLELINE:
-                case SqlStructureConstants.ENAME_COMMENT_SINGLELINE_CSTYLE:
+                case SqlElemNames.COMMENT_SINGLELINE:
+                case SqlElemNames.COMMENT_SINGLELINE_CSTYLE:
                     if (state.SpecialRegionActive == SpecialRegionType.NoFormat && contentElement.TextValue.ToUpperInvariant().Contains("[/NOFORMAT]")) {
                         Node skippedXml = NodeExtensions.ExtractStructureBetween(state.RegionStartNode, contentElement);
                         if (skippedXml != null) {
@@ -429,7 +432,7 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                     }
 
                     WhiteSpace_SeparateComment(contentElement, state);
-                    state.AddOutputContent((contentElement.Name == SqlStructureConstants.ENAME_COMMENT_SINGLELINE ? "--" : "//") + contentElement.TextValue.Replace("\r", "").Replace("\n", ""));
+                    state.AddOutputContent((contentElement.Name == SqlElemNames.COMMENT_SINGLELINE ? "--" : "//") + contentElement.TextValue.Replace("\r", "").Replace("\n", ""));
                     state.BreakExpected = true;
                     state.SourceBreakPending = true;
 
@@ -445,11 +448,11 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                     }
                     break;
 
-                case SqlStructureConstants.ENAME_STRING:
-                case SqlStructureConstants.ENAME_NSTRING:
+                case SqlElemNames.STRING:
+                case SqlElemNames.NSTRING:
                     WhiteSpace_SeparateWords(state);
                     string outValue = null;
-                    if (contentElement.Name.Equals(SqlStructureConstants.ENAME_NSTRING))
+                    if (contentElement.Name.Equals(SqlElemNames.NSTRING))
                         outValue = "N'" + contentElement.TextValue.Replace("'", "''") + "'";
                     else
                         outValue = "'" + contentElement.TextValue.Replace("'", "''") + "'";
@@ -457,31 +460,31 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                     state.WordSeparatorExpected = true;
                     break;
 
-                case SqlStructureConstants.ENAME_BRACKET_QUOTED_NAME:
+                case SqlElemNames.BRACKET_QUOTED_NAME:
                     WhiteSpace_SeparateWords(state);
                     state.AddOutputContent("[" + contentElement.TextValue.Replace("]", "]]") + "]");
                     state.WordSeparatorExpected = true;
                     break;
 
-                case SqlStructureConstants.ENAME_QUOTED_STRING:
+                case SqlElemNames.QUOTED_STRING:
                     WhiteSpace_SeparateWords(state);
                     state.AddOutputContent("\"" + contentElement.TextValue.Replace("\"", "\"\"") + "\"");
                     state.WordSeparatorExpected = true;
                     break;
 
-                case SqlStructureConstants.ENAME_COMMA:
+                case SqlElemNames.COMMA:
                     //comma always ignores requested word spacing
                     if (Options.TrailingCommas) {
                         WhiteSpace_BreakAsExpected(state);
                         state.AddOutputContent(FormatOperator(","));
 
                         if ((Options.ExpandCommaLists
-                                && !(contentElement.Parent.Name.Equals(SqlStructureConstants.ENAME_DDLDETAIL_PARENS)
-                                    || contentElement.Parent.Name.Equals(SqlStructureConstants.ENAME_FUNCTION_PARENS)
-                                    || contentElement.Parent.Name.Equals(SqlStructureConstants.ENAME_IN_PARENS)))
+                                && !(contentElement.Parent.Name.Equals(SqlElemNames.DDLDETAIL_PARENS)
+                                    || contentElement.Parent.Name.Equals(SqlElemNames.FUNCTION_PARENS)
+                                    || contentElement.Parent.Name.Equals(SqlElemNames.IN_PARENS)))
                             ||
                             (Options.ExpandInLists
-                                && contentElement.Parent.Name.Equals(SqlStructureConstants.ENAME_IN_PARENS))
+                                && contentElement.Parent.Name.Equals(SqlElemNames.IN_PARENS))
                         ) {
                             state.BreakExpected = true;
                         }
@@ -489,12 +492,12 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                     }
                     else {
                         if ((Options.ExpandCommaLists
-                                && !(contentElement.Parent.Name.Equals(SqlStructureConstants.ENAME_DDLDETAIL_PARENS)
-                                    || contentElement.Parent.Name.Equals(SqlStructureConstants.ENAME_FUNCTION_PARENS)
-                                    || contentElement.Parent.Name.Equals(SqlStructureConstants.ENAME_IN_PARENS)))
+                                && !(contentElement.Parent.Name.Equals(SqlElemNames.DDLDETAIL_PARENS)
+                                    || contentElement.Parent.Name.Equals(SqlElemNames.FUNCTION_PARENS)
+                                    || contentElement.Parent.Name.Equals(SqlElemNames.IN_PARENS)))
                             ||
                             (Options.ExpandInLists
-                                && contentElement.Parent.Name.Equals(SqlStructureConstants.ENAME_IN_PARENS))
+                                && contentElement.Parent.Name.Equals(SqlElemNames.IN_PARENS))
                         ) {
                             state.WhiteSpace_BreakToNextLine();
                             state.AddOutputContent(FormatOperator(","));
@@ -510,54 +513,54 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                     }
                     break;
 
-                case SqlStructureConstants.ENAME_PERIOD:
-                case SqlStructureConstants.ENAME_SEMICOLON:
-                case SqlStructureConstants.ENAME_SCOPERESOLUTIONOPERATOR:
+                case SqlElemNames.PERIOD:
+                case SqlElemNames.SEMICOLON:
+                case SqlElemNames.SCOPERESOLUTIONOPERATOR:
                     //always ignores requested word spacing, and doesn't request a following space either.
                     state.WordSeparatorExpected = false;
                     WhiteSpace_BreakAsExpected(state);
                     state.AddOutputContent(FormatOperator(contentElement.TextValue));
                     break;
 
-                case SqlStructureConstants.ENAME_ASTERISK:
-                case SqlStructureConstants.ENAME_EQUALSSIGN:
-                case SqlStructureConstants.ENAME_ALPHAOPERATOR:
-                case SqlStructureConstants.ENAME_OTHEROPERATOR:
+                case SqlElemNames.ASTERISK:
+                case SqlElemNames.EQUALSSIGN:
+                case SqlElemNames.ALPHAOPERATOR:
+                case SqlElemNames.OTHEROPERATOR:
                     WhiteSpace_SeparateWords(state);
                     state.AddOutputContent(FormatOperator(contentElement.TextValue));
                     state.WordSeparatorExpected = true;
                     break;
 
                 // this is like INNER JOIN etc
-                case SqlStructureConstants.ENAME_COMPOUNDKEYWORD:
+                case SqlElemNames.COMPOUNDKEYWORD:
                     WhiteSpace_SeparateWords(state);
-                    state.SetRecentKeyword(contentElement.GetAttributeValue(SqlStructureConstants.ANAME_SIMPLETEXT));
+                    state.SetRecentKeyword(contentElement.GetAttributeValue(SqlElemNames.ANAME_SIMPLETEXT));
                     // words I want to indent a little
-                    if (contentElement.GetAttributeValue(SqlStructureConstants.ANAME_SIMPLETEXT).Contains("JOIN"))
+                    if (contentElement.GetAttributeValue(SqlElemNames.ANAME_SIMPLETEXT).Contains("JOIN"))
                         state.Indent(state.IndentLevel - 1);
 
-                    state.AddOutputContent(FormatKeyword(contentElement.GetAttributeValue(SqlStructureConstants.ANAME_SIMPLETEXT)));
+                    state.AddOutputContent(FormatKeyword(contentElement.GetAttributeValue(SqlElemNames.ANAME_SIMPLETEXT)));
                     state.WordSeparatorExpected = true;
-                    ProcessSqlNodeList(contentElement.ChildrenByNames(SqlStructureConstants.ENAMELIST_COMMENT), state.IncrementIndent());
+                    ProcessSqlNodeList(contentElement.ChildrenByNames(SqlElemNames.ENAMELIST_COMMENT), state.IncrementIndent());
                     state.DecrementIndent();
                     state.WordSeparatorExpected = true;
                     break;
 
-                case SqlStructureConstants.ENAME_OTHERKEYWORD:
-                case SqlStructureConstants.ENAME_DATATYPE_KEYWORD:
+                case SqlElemNames.OTHERKEYWORD:
+                case SqlElemNames.DATATYPE_KEYWORD:
                     WhiteSpace_SeparateWords(state);
                     state.SetRecentKeyword(contentElement.TextValue);
                     state.AddOutputContent(FormatKeyword(contentElement.TextValue));
                     AddLineBreakIfAfterSpecifiedKeyword(contentElement, state);
                     break;
 
-                case SqlStructureConstants.ENAME_PSEUDONAME:
+                case SqlElemNames.PSEUDONAME:
                     WhiteSpace_SeparateWords(state);
                     state.AddOutputContent(FormatKeyword(contentElement.TextValue));
                     state.WordSeparatorExpected = true;
                     break;
 
-                case SqlStructureConstants.ENAME_FUNCTION_KEYWORD:
+                case SqlElemNames.FUNCTION_KEYWORD:
                     WhiteSpace_SeparateWords(state);
                     state.SetRecentKeyword(contentElement.TextValue);
                     state.AddOutputContent(contentElement.TextValue);
@@ -565,7 +568,7 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                     break;
 
                 // this is like unbracketed names of things
-                case SqlStructureConstants.ENAME_OTHERNODE:
+                case SqlElemNames.OTHERNODE:
                     WhiteSpace_SeparateWords(state);
 
                     // if the first character is a letter, we assume it is NOT a variable
@@ -577,27 +580,27 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                     state.WordSeparatorExpected = true;
                     break;
 
-                case SqlStructureConstants.ENAME_MONETARY_VALUE:
-                case SqlStructureConstants.ENAME_LABEL:
+                case SqlElemNames.MONETARY_VALUE:
+                case SqlElemNames.LABEL:
                     WhiteSpace_SeparateWords(state);
                     state.AddOutputContent(contentElement.TextValue);
                     state.WordSeparatorExpected = true;
                     break;
 
-                case SqlStructureConstants.ENAME_NUMBER_VALUE:
+                case SqlElemNames.NUMBER_VALUE:
                     WhiteSpace_SeparateWords(state);
                     state.AddOutputContent(contentElement.TextValue.ToLowerInvariant());
                     state.WordSeparatorExpected = true;
                     break;
 
-                case SqlStructureConstants.ENAME_BINARY_VALUE:
+                case SqlElemNames.BINARY_VALUE:
                     WhiteSpace_SeparateWords(state);
                     state.AddOutputContent("0x");
                     state.AddOutputContent(contentElement.TextValue.Substring(2).ToUpperInvariant());
                     state.WordSeparatorExpected = true;
                     break;
 
-                case SqlStructureConstants.ENAME_WHITESPACE:
+                case SqlElemNames.WHITESPACE:
                     //take note if it's a line-breaking space, but don't DO anything here
                     if (Regex.IsMatch(contentElement.TextValue, @"(\r|\n)+"))
                         state.SourceBreakPending = true;
@@ -635,7 +638,7 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                 //check whether this is a DECLARE/SET clause with similar precedent, and therefore exempt from double-linebreak.
                 Node thisClauseStarter = FirstSemanticElementChild(contentElement);
                 if (!(thisClauseStarter != null
-                  && thisClauseStarter.Name.Equals(SqlStructureConstants.ENAME_OTHERKEYWORD)
+                  && thisClauseStarter.Name.Equals(SqlElemNames.OTHERKEYWORD)
                   && state.GetRecentKeyword() != null
                   && ((thisClauseStarter.TextValue.ToUpperInvariant().Equals("SET")
                       && state.GetRecentKeyword().Equals("SET")
@@ -668,9 +671,9 @@ namespace PoorMansTSqlFormatterLib.Formatters {
         private Node FirstSemanticElementChild(Node contentElement) {
             Node target = null;
             while (contentElement != null) {
-                target = contentElement.ChildrenExcludingNames(SqlStructureConstants.ENAMELIST_NONCONTENT).FirstOrDefault();
+                target = contentElement.ChildrenExcludingNames(SqlElemNames.ENAMELIST_NONCONTENT).FirstOrDefault();
 
-                if (target != null && SqlStructureConstants.ENAMELIST_NONSEMANTICCONTENT.Contains(target.Name))
+                if (target != null && SqlElemNames.ENAMELIST_NONSEMANTICCONTENT.Contains(target.Name))
                     contentElement = target;
                 else
                     contentElement = null;
