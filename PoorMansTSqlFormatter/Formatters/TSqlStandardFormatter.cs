@@ -147,7 +147,8 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                     break;
 
                 case SqlElemNames.SELECTIONTARGET:
-                    state.BreakExpected = true;
+                    if (!contentElement.Parent.Name.Equals(SqlElemNames.JOIN_TARGET))
+                        state.BreakExpected = true;
                     //state.IncrementIndent();
                     ProcessSqlNodeList(contentElement.Children, state);
                     //state.DecrementIndent();
@@ -199,10 +200,18 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                     state.DecrementIndent();
                     break;
 
+                case SqlElemNames.FROM_CLAUSE:
+                    state.BreakExpected = true;
+                    state.UnIndentInitialBreak = true;
+                    ProcessSqlNodeList(contentElement.Children, state);
+                    //state.DecrementIndent();
+                    break;
+
                 case SqlElemNames.JOIN_TARGET:
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CONTAINER_OPEN), state);
+                    state.BreakExpected = true;
+                    state.UnIndentInitialBreak = false;
+                    ProcessSqlNodeList(contentElement.Children, state);
                     state.IncrementIndent();
-                    ProcessSqlNodeList(contentElement.ChildrenByName(SqlElemNames.CONTAINER_GENERALCONTENT), state);
                     break;
 
                 case SqlElemNames.JOIN_ON_SECTION:
@@ -535,14 +544,11 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                 case SqlElemNames.COMPOUNDKEYWORD:
                     WhiteSpace_SeparateWords(state);
                     state.SetRecentKeyword(contentElement.GetAttributeValue(SqlElemNames.ANAME_SIMPLETEXT));
-                    // words I want to indent a little
-                    if (contentElement.GetAttributeValue(SqlElemNames.ANAME_SIMPLETEXT).Contains("JOIN"))
-                        state.Indent(state.IndentLevel - 1);
 
-                    state.AddOutputContent(FormatKeyword(contentElement.GetAttributeValue(SqlElemNames.ANAME_SIMPLETEXT)));
-                    state.WordSeparatorExpected = true;
                     ProcessSqlNodeList(contentElement.ChildrenByNames(SqlElemNames.ENAMELIST_COMMENT), state.IncrementIndent());
                     state.DecrementIndent();
+                    state.WordSeparatorExpected = true;
+                    state.AddOutputContent(FormatKeyword(contentElement.GetAttributeValue(SqlElemNames.ANAME_SIMPLETEXT)));
                     state.WordSeparatorExpected = true;
                     break;
 

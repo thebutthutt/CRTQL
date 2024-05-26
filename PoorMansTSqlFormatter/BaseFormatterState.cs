@@ -28,6 +28,14 @@ namespace PoorMansTSqlFormatterLib {
 
         protected StringBuilder _outBuilder = new StringBuilder();
 
+        public virtual void DEBUG_PRINT(string content) {
+            _outBuilder.Append(content);
+        }
+
+        public virtual void DEBUG_NEWLINE() {
+            _outBuilder.Append(Environment.NewLine);
+        }
+
         public virtual void AddOutputContent(string content) {
             _outBuilder.Append(content);
         }

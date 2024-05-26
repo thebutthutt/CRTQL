@@ -97,6 +97,9 @@ namespace PoorMansTSqlFormatterLib {
             return newElement;
         }
 
+        /// <summary>
+        /// sets CurrentContainer to a newly created element of type containerType (inside a newly created element of type newElementName)
+        /// </summary>
         internal void StartNewContainer(string newElementName, string containerOpenValue, string containerType) {
             CurrentContainer = SaveNewElement(newElementName, "");
             Node containerOpen = SaveNewElement(SqlElemNames.CONTAINER_OPEN, "");
@@ -283,6 +286,7 @@ namespace PoorMansTSqlFormatterLib {
             EscapeAnyBetweenConditions();
             EscapeAnySelectionTarget();
             EscapeJoinCondition();
+            EscapeFromClause();
 
             //before single-statement-escaping
             Node previousContainerElement = CurrentContainer;
@@ -300,24 +304,24 @@ namespace PoorMansTSqlFormatterLib {
             }
         }
 
-        internal void ConsiderStartingNewClause() {
+        internal void ConsiderStartingNewClause(bool escapeFrom = true) {
             EscapeAnySelectionTarget();
             EscapeAnyBetweenConditions();
             EscapePartialStatementContainers();
             EscapeJoinCondition();
+            if (escapeFrom)
+                EscapeFromClause();
 
-            if (CurrentContainer.Name.Equals(SqlElemNames.SQL_CLAUSE)
-                && HasNonWhiteSpaceNonSingleCommentContent(CurrentContainer)
-                ) {
+            if (CurrentContainer.Name.Equals(SqlElemNames.SQL_CLAUSE) && HasNonWhiteSpaceNonSingleCommentContent(CurrentContainer) ) {
                 //complete current clause, start a new one in the same container
                 Node previousContainerElement = CurrentContainer;
                 CurrentContainer = SaveNewElement(SqlElemNames.SQL_CLAUSE, "", CurrentContainer.Parent);
                 MigrateApplicableCommentsFromContainer(previousContainerElement);
             }
             else if (CurrentContainer.Name.Equals(SqlElemNames.EXPRESSION_PARENS)
-            || CurrentContainer.Name.Equals(SqlElemNames.IN_PARENS)
-            || CurrentContainer.Name.Equals(SqlElemNames.SELECTIONTARGET_PARENS)
-            || CurrentContainer.Name.Equals(SqlElemNames.SQL_STATEMENT)
+                    || CurrentContainer.Name.Equals(SqlElemNames.IN_PARENS)
+                    || CurrentContainer.Name.Equals(SqlElemNames.SELECTIONTARGET_PARENS)
+                    || CurrentContainer.Name.Equals(SqlElemNames.SQL_STATEMENT)
             ) {
                 //create new clause and set context to it.
                 CurrentContainer = SaveNewElement(SqlElemNames.SQL_CLAUSE, "");
@@ -327,13 +331,20 @@ namespace PoorMansTSqlFormatterLib {
         internal void EscapeAnySelectionTarget() {
             if (PathNameMatches(0, SqlElemNames.SELECTIONTARGET))
                 CurrentContainer = CurrentContainer.Parent;
+            if (PathNameMatches(0, SqlElemNames.JOIN_TARGET))
+                CurrentContainer = CurrentContainer.Parent;
         }
 
         internal void EscapeJoinCondition() {
-            if (PathNameMatches(0, SqlElemNames.CONTAINER_GENERALCONTENT)
-                && PathNameMatches(1, SqlElemNames.JOIN_ON_SECTION)
-                )
+            if (PathNameMatches(0, SqlElemNames.CONTAINER_GENERALCONTENT) && PathNameMatches(1, SqlElemNames.JOIN_ON_SECTION) )
                 MoveToAncestorContainer(2);
+        }
+
+        internal void EscapeFromClause() {
+            if (PathNameMatches(0, SqlElemNames.CONTAINER_GENERALCONTENT) && PathNameMatches(1, SqlElemNames.FROM_CLAUSE))
+                MoveToAncestorContainer(2);
+            if (PathNameMatches(0, SqlElemNames.FROM_CLAUSE))
+                CurrentContainer = CurrentContainer.Parent;
         }
 
         internal bool FindValidBatchEnd() {

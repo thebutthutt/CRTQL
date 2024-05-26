@@ -217,9 +217,7 @@ namespace PoorMansTSqlFormatterLib.Parsers {
                             sqlTree.CurrentContainer = sqlTree.SaveNewElement(SqlElemNames.CURSOR_DECLARATION, "");
                             sqlTree.SaveNewElement(SqlElemNames.OTHERKEYWORD, token.Value);
                         }
-                        else if (sqlTree.PathNameMatches(0, SqlElemNames.DDL_PROCEDURAL_BLOCK)
-                        && _TriggerConditionDetector.IsMatch(significantTokensString)
-                        ) {
+                        else if (sqlTree.PathNameMatches(0, SqlElemNames.DDL_PROCEDURAL_BLOCK) && _TriggerConditionDetector.IsMatch(significantTokensString) ) {
                             //horrible complicated forward-search, to avoid having to keep a different "Trigger Condition" state for Update, Insert and Delete statement-starting keywords 
                             Match triggerConditions = _TriggerConditionDetector.Match(significantTokensString);
                             sqlTree.CurrentContainer = sqlTree.SaveNewElement(SqlElemNames.TRIGGER_CONDITION, "");
@@ -429,6 +427,7 @@ namespace PoorMansTSqlFormatterLib.Parsers {
                             && !ContentStartsWithKeyword(sqlTree.CurrentContainer, "SET")
                             ) {
                                 sqlTree.EscapeJoinCondition();
+                                // escape join target here
                                 sqlTree.StartNewContainer(SqlElemNames.JOIN_ON_SECTION, token.Value, SqlElemNames.CONTAINER_GENERALCONTENT);
                             }
                             else {
@@ -656,10 +655,15 @@ namespace PoorMansTSqlFormatterLib.Parsers {
                             sqlTree.SaveNewElement(SqlElemNames.OTHERKEYWORD, token.Value);
                         }
                         else if (_JoinDetector.IsMatch(significantTokensString)) {
-                            sqlTree.ConsiderStartingNewClause();
+                            sqlTree.ConsiderStartingNewClause(false);
                             string joinText = _JoinDetector.Match(significantTokensString).Value;
                             int targetKeywordCount = joinText.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Length;
+
+                            sqlTree.CurrentContainer = sqlTree.SaveNewElement(SqlElemNames.JOIN_TARGET, "");
+                            //Node containerOpen = sqlTree.SaveNewElement(SqlElemNames.CONTAINER_OPEN, "");
                             ProcessCompoundKeyword(tokenList, sqlTree, sqlTree.CurrentContainer, ref tokenID, significantTokenPositions, targetKeywordCount);
+                            //sqlTree.CurrentContainer = sqlTree.SaveNewElement(SqlElemNames.CONTAINER_GENERALCONTENT, "");
+
                             sqlTree.CurrentContainer = sqlTree.SaveNewElement(SqlElemNames.SELECTIONTARGET, "");
                         }
                         else if (significantTokensString.StartsWith("UNION ALL ")) {
@@ -867,7 +871,9 @@ namespace PoorMansTSqlFormatterLib.Parsers {
                             }
                             else {
                                 sqlTree.ConsiderStartingNewClause();
-                                sqlTree.SaveNewElement(SqlElemNames.OTHERKEYWORD, token.Value);
+                                sqlTree.StartNewContainer(SqlElemNames.FROM_CLAUSE, token.Value, SqlElemNames.CONTAINER_GENERALCONTENT);
+                                //sqlTree.CurrentContainer = sqlTree.SaveNewElement(SqlElemNames.FROM_CLAUSE, "");
+                                //sqlTree.SaveNewElement(SqlElemNames.OTHERKEYWORD, token.Value);
                                 sqlTree.CurrentContainer = sqlTree.SaveNewElement(SqlElemNames.SELECTIONTARGET, "");
                             }
                         }
@@ -961,7 +967,7 @@ namespace PoorMansTSqlFormatterLib.Parsers {
                                 sqlTree.ConsiderStartingNewStatement();
                             }
 
-                            //check for statements starting...
+                            //check for clauses starting...
                             if (IsClauseStarter(token)) {
                                 sqlTree.ConsiderStartingNewClause();
                             }
@@ -1107,15 +1113,12 @@ namespace PoorMansTSqlFormatterLib.Parsers {
             return targetFound;
         }
 
-        private void ProcessCompoundKeywordWithError(ITokenList tokenList, ParseTree sqlTree,
-                                                     Node currentContainerElement, ref int tokenID,
-                                                     List<int> significantTokenPositions, int keywordCount) {
+        private void ProcessCompoundKeywordWithError(ITokenList tokenList, ParseTree sqlTree, Node currentContainerElement, ref int tokenID, List<int> significantTokenPositions, int keywordCount) {
             ProcessCompoundKeyword(tokenList, sqlTree, currentContainerElement, ref tokenID, significantTokenPositions, keywordCount);
             sqlTree.SetError();
         }
 
-        private void ProcessCompoundKeyword(ITokenList tokenList, ParseTree sqlTree, Node targetContainer,
-                                            ref int tokenID, List<int> significantTokenPositions, int keywordCount) {
+        private void ProcessCompoundKeyword(ITokenList tokenList, ParseTree sqlTree, Node targetContainer, ref int tokenID, List<int> significantTokenPositions, int keywordCount) {
             Node compoundKeyword = sqlTree.SaveNewElement(SqlElemNames.COMPOUNDKEYWORD, "", targetContainer);
             string targetText = ExtractTokensString(tokenList, significantTokenPositions.GetRange(0, keywordCount)).TrimEnd();
             compoundKeyword.SetAttribute(SqlElemNames.ANAME_SIMPLETEXT, targetText);
@@ -1189,8 +1192,7 @@ namespace PoorMansTSqlFormatterLib.Parsers {
             }
         }
 
-        private string GetKeywordMatchPhrase(ITokenList tokenList, int tokenID, ref List<string> rawKeywordParts,
-                                             ref List<int> tokenCounts, ref List<List<IToken>> overflowNodes) {
+        private string GetKeywordMatchPhrase(ITokenList tokenList, int tokenID, ref List<string> rawKeywordParts, ref List<int> tokenCounts, ref List<List<IToken>> overflowNodes) {
             string phrase = "";
             int phraseComponentsFound = 0;
             rawKeywordParts = new List<string>();
@@ -1266,16 +1268,13 @@ namespace PoorMansTSqlFormatterLib.Parsers {
             return significantTokenPositions;
         }
 
-        private Node ProcessCompoundKeyword(ParseTree sqlTree, string newElementName, ref int tokenID,
-                                            Node currentContainerElement, int compoundKeywordCount,
-                                            List<int> compoundKeywordTokenCounts, List<string> compoundKeywordRawStrings) {
+        private Node ProcessCompoundKeyword(ParseTree sqlTree, string newElementName, ref int tokenID, Node currentContainerElement, int compoundKeywordCount, List<int> compoundKeywordTokenCounts, List<string> compoundKeywordRawStrings) {
             Node newElement = NodeFactory.CreateNode(newElementName, GetCompoundKeyword(ref tokenID, compoundKeywordCount, compoundKeywordTokenCounts, compoundKeywordRawStrings));
             sqlTree.CurrentContainer.AddChild(newElement);
             return newElement;
         }
 
-        private string GetCompoundKeyword(ref int tokenID, int compoundKeywordCount,
-                                          List<int> compoundKeywordTokenCounts, List<string> compoundKeywordRawStrings) {
+        private string GetCompoundKeyword(ref int tokenID, int compoundKeywordCount, List<int> compoundKeywordTokenCounts, List<string> compoundKeywordRawStrings) {
             tokenID += compoundKeywordTokenCounts[compoundKeywordCount - 1] - 1;
             string outString = "";
             for (int i = 0; i < compoundKeywordCount; i++)

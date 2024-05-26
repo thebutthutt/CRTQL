@@ -119,6 +119,7 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                 case SqlElemNames.MERGE_WHEN:
                 case SqlElemNames.MERGE_THEN:
                 case SqlElemNames.MERGE_ACTION:
+                case SqlElemNames.FROM_CLAUSE:
                 case SqlElemNames.JOIN_TARGET:
                 case SqlElemNames.JOIN_ON_SECTION:
                 case SqlElemNames.DDL_RETURNS:

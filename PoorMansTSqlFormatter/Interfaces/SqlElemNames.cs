@@ -85,6 +85,7 @@ namespace PoorMansTSqlFormatterLib.Interfaces {
         public const string MERGE_WHEN = "MergeWhen";
         public const string MERGE_THEN = "MergeThen";
         public const string MERGE_ACTION = "MergeAction";
+        public const string FROM_CLAUSE = "FromClause";
         public const string JOIN_TARGET = "JoinTarget";
         public const string JOIN_ON_SECTION = "JoinOn";
 

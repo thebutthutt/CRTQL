@@ -18,6 +18,18 @@ BEGIN TRY
             ON  Employee.Col1 = SomeTable.col1
             AND Employee.Col2 = [SomeTable].[col2]
             AND [Employee].[Col3] = [SomeTable].[col3]
+        INNER JOIN 
+            [Scherm].[Trblk] 
+            INNER JOIN @SomeTable AS SomeTable
+                ON  Employee.Col1 = SomeTable.col1
+                AND Employee.Col2 = [SomeTable].[col2]
+                AND [Employee].[Col3] = [SomeTable].[col3]
+            ON  Employee.Col1 = SomeTable.col1
+            AND Employee.Col2 = [SomeTable].[col2]
+        INNER JOIN @SomeTable AS SomeTable
+            ON  Employee.Col1 = SomeTable.col1
+            AND Employee.Col2 = [SomeTable].[col2]
+            AND [Employee].[Col3] = [SomeTable].[col3]
         INNER JOIN [Scherm].[Trblk]
             ON [Scherm].[Trblk].[ccc] = SomeTable.[col4]
     WHERE 
