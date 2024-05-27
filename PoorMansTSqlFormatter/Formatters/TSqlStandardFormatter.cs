@@ -72,12 +72,12 @@ namespace PoorMansTSqlFormatterLib.Formatters {
             if (state.SpecialRegionActive == SpecialRegionType.NoFormat) {
                 Node skippedXml = NodeExtensions.ExtractStructureBetween(state.RegionStartNode, sqlTreeDoc);
                 TSqlIdentityFormatter tempFormatter = new TSqlIdentityFormatter();
-                state.AddOutputContent(tempFormatter.FormatSQLTree(skippedXml));
+                state.AddOutputContentRaw(tempFormatter.FormatSQLTree(skippedXml));
             }
             else if (state.SpecialRegionActive == SpecialRegionType.Minify) {
                 Node skippedXml = NodeExtensions.ExtractStructureBetween(state.RegionStartNode, sqlTreeDoc);
                 TSqlIdentityFormatter tempFormatter = new TSqlIdentityFormatter();
-                state.AddOutputContent(tempFormatter.FormatSQLTree(skippedXml));
+                state.AddOutputContentRaw(tempFormatter.FormatSQLTree(skippedXml));
             }
             return state.DumpOutput();
         }
@@ -369,7 +369,7 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                         Node skippedXml = NodeExtensions.ExtractStructureBetween(state.RegionStartNode, contentElement);
                         if (skippedXml != null) {
                             TSqlIdentityFormatter tempFormatter = new TSqlIdentityFormatter();
-                            state.AddOutputContent(tempFormatter.FormatSQLTree(skippedXml));
+                            state.AddOutputContentRaw(tempFormatter.FormatSQLTree(skippedXml));
                             state.WordSeparatorExpected = false;
                             state.BreakExpected = false;
                         }
@@ -380,7 +380,7 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                         Node skippedXml = NodeExtensions.ExtractStructureBetween(state.RegionStartNode, contentElement);
                         if (skippedXml != null) {
                             TSqlIdentityFormatter tempFormatter = new TSqlIdentityFormatter();
-                            state.AddOutputContent(tempFormatter.FormatSQLTree(skippedXml));
+                            state.AddOutputContentRaw(tempFormatter.FormatSQLTree(skippedXml));
                             state.WordSeparatorExpected = false;
                             state.BreakExpected = false;
                         }
@@ -421,7 +421,7 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                         Node skippedXml = NodeExtensions.ExtractStructureBetween(state.RegionStartNode, contentElement);
                         if (skippedXml != null) {
                             TSqlIdentityFormatter tempFormatter = new TSqlIdentityFormatter();
-                            state.AddOutputContent(tempFormatter.FormatSQLTree(skippedXml));
+                            state.AddOutputContentRaw(tempFormatter.FormatSQLTree(skippedXml));
                             state.WordSeparatorExpected = false;
                             state.BreakExpected = false;
                         }
@@ -432,15 +432,17 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                         Node skippedXml = NodeExtensions.ExtractStructureBetween(state.RegionStartNode, contentElement);
                         if (skippedXml != null) {
                             TSqlIdentityFormatter tempFormatter = new TSqlIdentityFormatter();
-                            state.AddOutputContent(tempFormatter.FormatSQLTree(skippedXml));
+                            state.AddOutputContentRaw(tempFormatter.FormatSQLTree(skippedXml));
                             state.WordSeparatorExpected = false;
                             state.BreakExpected = false;
                         }
                         state.SpecialRegionActive = null;
                         state.RegionStartNode = null;
                     }
+                    else {
+                        WhiteSpace_SeparateComment(contentElement, state);
+                    }
 
-                    WhiteSpace_SeparateComment(contentElement, state);
                     state.AddOutputContent((contentElement.Name == SqlElemNames.COMMENT_SINGLELINE ? "--" : "//") + contentElement.TextValue.Replace("\r", "").Replace("\n", ""));
                     state.BreakExpected = true;
                     state.SourceBreakPending = true;
@@ -455,6 +457,7 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                         state.SpecialRegionActive = SpecialRegionType.Minify;
                         state.RegionStartNode = contentElement;
                     }
+
                     break;
 
                 case SqlElemNames.STRING:

@@ -14,12 +14,15 @@ BEGIN TRY
         col4
     FROM 
         [AdventureWorks2017].[HumanResources].[Employee] 
+        -- Join A
         INNER JOIN @SomeTable AS SomeTable
             ON  Employee.Col1 = SomeTable.col1
             AND Employee.Col2 = [SomeTable].[col2]
             AND [Employee].[Col3] = [SomeTable].[col3]
+        -- Join B
         INNER JOIN 
             [Scherm].[Trblk] 
+            -- Join C
             INNER JOIN @SomeTable AS SomeTable
                 ON  Employee.Col1 = SomeTable.col1
                 AND Employee.Col2 = [SomeTable].[col2]
@@ -44,8 +47,12 @@ END TRY
 BEGIN CATCH
     IF (@@TRANCOUNT > 0) 
     BEGIN
+
+        --[NOFORMAT]
         ROLLBACK TRAN
         SET @ErrMsg = CONCAT((SELECT ERROR_PROCEDURE()),'>',(SELECT ERROR_LINE()),':',(SELECT ERROR_MESSAGE()))
         RAISERROR(@ErrMsg)
+        --[/NOFORMAT]
+
         END
 END CATCH

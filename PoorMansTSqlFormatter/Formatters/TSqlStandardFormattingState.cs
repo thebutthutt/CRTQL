@@ -90,6 +90,10 @@ namespace PoorMansTSqlFormatterLib.Formatters {
                 }
             }
 
+            public void AddOutputContentRaw(string content) {
+                base.AddOutputContent(content);
+            }
+
             public override void AddOutputLineBreak() {
                 //if linebreaks are added directly in the content (eg in comments or strings), they 
                 // won't be accounted for here - that's ok.
