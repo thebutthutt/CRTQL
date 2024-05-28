@@ -171,6 +171,7 @@ namespace PoorMansTSqlFormatterLib {
             EscapeAnyBetweenConditions();
             EscapeAnySelectionTarget();
             EscapeJoinCondition();
+            EscapeFromCondition();
 
             if (HasNonWhiteSpaceNonCommentContent(CurrentContainer)) {
                 EscapeCursorForBlock();
